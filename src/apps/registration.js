@@ -8,7 +8,6 @@ var ApiError = require('../ApiError.js');
 
 
 var app = express();
-app.disable('x-powered-by');
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.post('/', function(req, res){
