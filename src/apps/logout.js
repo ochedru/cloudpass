@@ -6,6 +6,7 @@ var config = require('config');
 var url = require('url');
 
 var app = express();
+app.disable('x-powered-by');
 app.get('/', function(req, res){
     res.clearCookie('sessionToken', {path: url.parse(Optional.ofNullable(config.get('server.rootUrl')).orElse('')+'/v1').pathname})
             .status(204)

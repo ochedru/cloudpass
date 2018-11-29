@@ -40,6 +40,7 @@ passport.use('sso-jwt-request', ssoStrategy('jwtRequest', 'payload.iss'));
 passport.use('sso-jwt-response', ssoStrategy('jwtResponse', 'header.kid'));
 
 var app = express();
+app.disable('x-powered-by');
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use('/', ssaclAuthenticate('sso-jwt-request', 'sso-jwt-response'));

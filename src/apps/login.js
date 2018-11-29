@@ -13,6 +13,7 @@ var authenticateAccount = require('../api/helpers/accountHelper').authenticateAc
 var errorHandler = require('./helpers/errorHandler');
 
 var app = express();
+app.disable('x-powered-by');
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.post('/', function(req, res){

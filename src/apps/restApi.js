@@ -98,6 +98,7 @@ module.exports = function(secret){
         .then(function(swaggerExpress){
 
             var app = express();
+            app.disable('x-powered-by');
             app.use(morgan("tiny", { stream: {write: _.flow(_.nthArg(0), winston.loggers.get('http').info)}}));
             //Sauthc1 needs the raw body
             app.use(bodyParser.json({

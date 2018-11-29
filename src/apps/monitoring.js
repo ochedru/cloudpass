@@ -9,6 +9,7 @@ const models = require('../models');
 Health.addCheck('database', _.bindKey(models.sequelize, 'authenticate'));
 
 const app = express();
+app.disable('x-powered-by');
 
 app.get('/health', (req, res) =>
     Health.checkup()

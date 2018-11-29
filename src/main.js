@@ -37,6 +37,7 @@ function startServers(secret){
 
     //load functional components
     const app = express();
+    app.disable('x-powered-by');
     app.set('secret', secret);
     app.use(cookieParser(secret));
     app.set('ssaclCls', ssaclCls);
