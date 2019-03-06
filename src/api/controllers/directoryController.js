@@ -114,9 +114,11 @@ controller.consumeSamlAssertion = function (req, res) {
         .spread((samlResponse, mappingRules) =>
             models.sequelize.requireTransaction(() => {
                 logger.debug('incoming SAML response: %s', JSON.stringify(samlResponse));
+                const email = getEmail(samlResponse);
+                logger.debug('found email from SAML response: %s', email);
                 return models.account.findOrCreate({
                     where: {
-                        email: getEmail(samlResponse),
+                        email: email,
                         directoryId: req.swagger.params.id.value
                     },
                     defaults: {
@@ -126,6 +128,7 @@ controller.consumeSamlAssertion = function (req, res) {
                     }
                 })
                     .spread((account, created) => {
+                        logger.debug('found account from SAML response: %s', account.id);
                         const providerData = _.defaults({providerId: 'saml'}, _.mapValues(samlResponse.user.attributes, _.head));
                         const application = hrefHelper.resolveHref(req.authInfo.app_href);
                         return BluebirdPromise.join(

@@ -14,16 +14,26 @@ exports.fromConfig = function (winstonConf, callback) {
             return new (require(moduleName))(transportConf);
         } catch (e) {
             if (e instanceof Error) {
-                return new winston.transports[_.upperFirst(moduleName)](transportConf);
+                try {
+                    return new (require('./logging_transports/' + moduleName))(transportConf);
+                } catch (e) {
+                    if (e instanceof Error) {
+                        return new winston.transports[_.upperFirst(moduleName)](transportConf);
+                    } else {
+                        throw e;
+                    }
+                }
             } else {
                 throw e;
             }
         }
     }
+
     for (const loggerName in winstonConf.loggers) {
         if (Object.prototype.hasOwnProperty.call(winstonConf.loggers, loggerName)) {
             const loggerConf = winstonConf.loggers[loggerName];
             winston.loggers.add(loggerName, {
+                exitOnError: false,
                 format: combine(
                     splat(),
                     simple(),
