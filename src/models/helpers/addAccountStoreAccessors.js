@@ -117,7 +117,7 @@ function selectIdsQueries(source, destination){
 module.exports = function(source, destination){
     var queryTemplates = _.map(selectIdsQueries(source, destination),function(query){
         //remove trailing semicolon and put the subquery between brackets
-        return _.template('('+query.replace(/\;$/, '')+')');
+        return _.template('('+query.replace(/;$/, '')+')');
     });
     source.addFindAndCount(destination, function(options){
         return _.defaults(

@@ -67,6 +67,7 @@ persistence:
 #    dialect: sqlite
 #    storage: cloudpass.db
 
+environment: development
 
 logging:
   loggers:

@@ -78,12 +78,15 @@ module.exports = function (secret) {
         function (apiKeyId, providedSecret, done) {
             getApiKey(apiKeyId)
                 .then(function (apiKey) {
+                    const logger = winston.loggers.get('http');
+                    logger.error('before done');
                     done(
                         null,
                         Optional.ofNullable(apiKey)
                             .filter(_.flow(_.property('secret'), _.partial(_.eq, providedSecret)))
                             .orElse(false)
                     );
+                    logger.error('after done');
                 })
                 .catch(done);
         }

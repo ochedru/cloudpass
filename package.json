@@ -25,6 +25,7 @@
   "main": "src/main.js",
   "dependencies": {
     "@fczbkk/url-match": "3.3.5",
+    "@sentry/node": "^4.6.4",
     "auth-header": "1.0.0",
     "bcryptjs": "2.4.3",
     "body-parser": "1.18.3",
@@ -46,7 +47,6 @@
     "nodemailer": "5.1.1",
     "nodemailer-mandrill-transport": "1.2.0",
     "optional-js": "2.0.0",
-    "ovh-winston-ldp": "0.3.3",
     "passport": "0.4.0",
     "passport-http": "0.3.0",
     "passport-jwt-cookiecombo": "1.0.5",
@@ -55,7 +55,6 @@
     "pg-hstore": "2.3.2",
     "qr-image": "3.2.0",
     "randomstring": "1.1.5",
-    "raven": "2.6.4",
     "saml2-js": "2.0.3",
     "sequelize": "4.42.1",
     "shimmer": "1.2.1",
@@ -64,7 +63,7 @@
     "swagger-express-mw": "0.7.0",
     "throw": "1.1.0",
     "umzug": "2.2.0",
-    "winston": "3.1.0"
+    "winston": "3.2.1"
   },
   "devDependencies": {
     "bootprint": "1.0.2",
@@ -74,12 +73,12 @@
     "dockerode": "2.5.8",
     "dockerode-promise": "0.1.0",
     "env-test": "1.0.0",
+    "eslint": "^5.15.1",
     "gh-pages-travis": "1.0.4",
     "gulp": "4.0.0",
     "gulp-deb": "0.2.1",
     "gulp-rename": "1.4.0",
     "istanbul": "1.1.0-alpha.1",
-    "jshint": "2.9.7",
     "merge-stream": "1.0.1",
     "mocha": "5.2.0",
     "rewire": "4.0.0",
@@ -96,7 +95,7 @@
     "clean": "rimraf build",
     "test:unit": "cross-conf-env node node_modules/istanbul/lib/cli.js cover --config=tests/unit/.istanbul.yml node_modules/mocha/bin/_mocha -- --opts tests/mocha.opts  --reporter $npm_package_config_mocha_reporter tests/unit",
     "test:integration": "cross-conf-env node node_modules/istanbul/lib/cli.js cover --config=tests/integration/.istanbul.yml node_modules/mocha/bin/_mocha -- --opts tests/mocha.opts  --reporter $npm_package_config_mocha_reporter tests/integration",
-    "lint": "jshint src",
+    "lint": "eslint src",
     "pretest": "npm run lint",
     "test": "cross-conf-env node node_modules/istanbul/lib/cli.js cover --config=tests/.istanbul.yml node_modules/mocha/bin/_mocha -- --opts tests/mocha.opts --reporter $npm_package_config_mocha_reporter tests",
     "coveralls": "cat build/reports/coverage/global/lcov.info | coveralls",
@@ -111,19 +110,22 @@
   "config": {
     "mocha_reporter": "spec"
   },
-  "jshintConfig": {
-    "node": true,
-    "curly": true,
-    "eqeqeq": true,
-    "forin": true,
-    "freeze": true,
-    "funcscope": true,
-    "nocomma": true,
-    "nonew": true,
-    "strict": true,
-    "undef": true,
-    "unused": true,
-    "validthis": true,
-    "esversion": 6
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "commonjs": true,
+      "es6": true
+    },
+    "extends": "eslint:recommended",
+    "globals": {
+      "Atomics": "readonly",
+      "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+      "ecmaVersion": 2018
+    },
+    "rules": {
+      "no-console": 0
+    }
   }
 }

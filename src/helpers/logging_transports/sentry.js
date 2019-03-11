@@ -1,93 +1,78 @@
-const _ = require('lodash');
-const Raven = require('raven');
+"use strict";
+
 const Transport = require('winston-transport');
+const Sentry = require('@sentry/node');
+const pjson = require('../../../package.json');
+const config = require('config');
 
-function errorHandler(err) {
-    console.error(err.message);
-}
-
-class SentryTransport extends Transport {
-
-    constructor(opts) {
-        let options = opts || {};
-        options = _.defaultsDeep(options, {
-            dsn: process.env.SENTRY_DSN || '',
-            config: {
-                logger: 'sentry',
-                captureUnhandledRejections: false
-            },
-            errorHandler,
-            install: false,
-            name: 'sentry',
-            silent: false,
-            level: 'info'
-        });
-        super(_.omit(options, [
-            'level',
-            'install',
-            'dsn',
-            'config',
-            'tags',
-            'globalTags',
-            'extra',
-            'errorHandler',
-            'raven'
-        ]));
-
-        if (options.tags) {
-            options.config.tags = options.tags;
-        } else if (options.globalTags) {
-            options.config.tags = options.globalTags;
-        }
-
-        if (options.extra) {
-            options.config.extra = options.config.extra || {};
-            options.config.extra = _.defaults(
-                options.config.extra,
-                options.extra
-            );
-        }
-
-        // expose the instance on the transport
-        this.raven = options.raven || Raven.config(options.dsn, options.config);
-
-        if (_.isFunction(options.errorHandler) && this.raven.listeners('error').length === 0) {
-            this.raven.on('error', options.errorHandler);
-        }
-
-        // it automatically will detect if it's already installed
-        if (options.install || options.patchGlobal) {
-            this.raven.install();
-        }
-
-    }
-
-    log(info, callback) {
-        setImmediate(() => {
-            this.emit('logged', info);
-        });
-
-        if (this.silent) {
-        } else {
-
-            const message = this._normalizeMessage(msg, meta);
-            const context = _.isObject(meta) ? meta : {};
-            context.level = this._levelsMap[level];
-            context.extra = this._normalizeExtra(msg, meta);
-
-            if (this._shouldCaptureException(context.level))
-                return this.raven.captureException(message, context, function () {
-                    fn(null, true);
-                });
-
-            this.raven.captureMessage(message, context, function () {
-                callback();
-            });
-        }
-
-        callback();
-    }
+const winstonLevelToSentryLevel = {
+    silly: 'debug',
+    verbose: 'debug',
+    info: 'info',
+    debug: 'debug',
+    warn: 'warning',
+    error: 'error'
 };
 
+const prepareMeta = (info) => {
+    let extra = Object.assign({}, info);
+    delete extra.message;
+    delete extra.level;
+    delete extra.tags;
+    delete extra.error;
 
+    return {
+        level: winstonLevelToSentryLevel[info.level],
+        tags: info.tags || {},
+        extra: extra
+    };
+};
+
+class SentryTransport extends Transport {
+    constructor(options) {
+        super(options);
+
+        this.options = Object.assign({
+            dsn: '',
+            release: pjson.version,
+            environment: config.environment,
+            tags: {},
+            extra: {},
+            beforeBreadcrumb(breadcrumb) {
+                // discard console breadcrumbs
+                return breadcrumb.category === 'console' ? null : breadcrumb;
+            }
+        }, options);
+
+        this.sentry = Sentry;
+        this.sentry.init(this.options);
+    }
+
+    log(info, done) {
+        if (this.silent) {
+            return done(null, true);
+        }
+        const meta = prepareMeta(info);
+        this.sentry.configureScope((scope) => {
+            scope.clear();
+            scope.setLevel(meta.level);
+            for (const [key, value] of Object.entries(Object.assign({}, this.options.tags, meta.tags))) {
+                scope.setTag(key, value);
+            }
+            for (const [key, value] of Object.entries(Object.assign({}, this.options.extra, meta.extra))) {
+                scope.setExtra(key, value);
+            }
+        });
+        let eventId;
+        if (info.error) {
+            eventId = this.sentry.captureException(info.error);
+        } else {
+            eventId = this.sentry.captureMessage(info.message);
+        }
+        done(null, eventId);
+    }
+}
+
+SentryTransport.prototype.name = 'sentry';
 module.exports = SentryTransport;
+

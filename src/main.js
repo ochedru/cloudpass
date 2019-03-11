@@ -12,14 +12,15 @@ const _ = require('lodash');
 const loggingHelper = require('./helpers/loggingHelper');
 const loadLoggingConfig = require('sequelize').Promise.promisify(loggingHelper.fromConfig);
 
+
 module.exports = loadLoggingConfig(config.get('logging'))
-    .then(function(){
-        if(cluster.isMaster){
+    .then(function () {
+        if (cluster.isMaster) {
             //run pending migrations and fork clusters
             var secret = config.get('server.secret') || randomstring.generate(50);
             return require('./models').migrate()
-                .then(function(){
-                    if(config.get('server.clustering') && numCPUs > 1){
+                .then(function () {
+                    if (config.get('server.clustering') && numCPUs > 1) {
                         return _.times(Math.min(numCPUs, 4), cluster.fork.bind(cluster, {secret}));
                     } else {
                         return startServers(secret);
@@ -28,9 +29,9 @@ module.exports = loadLoggingConfig(config.get('logging'))
         } else {
             return startServers(process.env.secret);
         }
-});
+    });
 
-function startServers(secret){
+function startServers(secret) {
     //enable ACL
     require('./models').useSsacl(ssacl, ssaclCls);
 
@@ -40,7 +41,7 @@ function startServers(secret){
     app.set('secret', secret);
     app.use(cookieParser(secret));
     app.set('ssaclCls', ssaclCls);
-    app.get('/', function(req, res){
+    app.get('/', function (req, res) {
         res.status(302).location('ui/').end();
     });
     app.use('/login', require('./apps/login'));
@@ -51,12 +52,12 @@ function startServers(secret){
     app.use('/sso', require('./apps/sso'));
 
     return require('./apps/restApi')(secret)
-        .then(function(apiApp){
-          app.use('/v1', apiApp);
-          //start the main & monitoring servers
-          return {
-              main: app.listen(config.get('server.port')),
-              monitoring: require('./apps/monitoring').listen(config.get('server.monitoringPort'))
-          };
+        .then(function (apiApp) {
+            app.use('/v1', apiApp);
+            //start the main & monitoring servers
+            return {
+                main: app.listen(config.get('server.port')),
+                monitoring: require('./apps/monitoring').listen(config.get('server.monitoringPort'))
+            };
         });
 }

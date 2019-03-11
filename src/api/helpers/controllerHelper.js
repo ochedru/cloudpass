@@ -104,7 +104,7 @@ function parseExpandParam(expandParam){
                 return _(expandStrings)
                     .map(function(expandString){
                         //separate the association name and the pagination parts
-                        var expandParts = /^([^\(]*)\(([^\)]*)\)*$/.exec(expandString);
+                        var expandParts = /^([^(]*)\(([^)]*)\)*$/.exec(expandString);
                         var associationName, pagination;
                         if(expandParts){
                             //pagination (limit or offset) was specified
@@ -215,7 +215,7 @@ exports.createAndExpand = function(model, foreignKeys, req, res, inTransaction){
 };
 
 function update(model, id, newAttributes){
-  return model.findById(id)
+  return model.findByPk(id)
       .tap(ApiError.assertFound)
       .then(resource =>
           resource.update(

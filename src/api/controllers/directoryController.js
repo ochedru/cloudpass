@@ -152,7 +152,7 @@ controller.consumeSamlAssertion = function (req, res) {
                     });
             })
         )
-        .tap(([account, created, accountStore]) =>
+        .tap(([account, _, accountStore]) =>
             //check that the account belongs to the required application or organization
             accountStore.getAccounts({
                 where: {id: account.id},

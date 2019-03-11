@@ -39,9 +39,9 @@ module.exports = function (err, req, res, next) {
     var apiError = exceptionToApiError(err);
 
     if(apiError.status === 500){
-        logger.error('Unexpected error:\n%s', err.stack);
+        logger.error('Unexpected error: %s', err);
     } else {
-        logger.debug('Request failed:\n%s', err.stack);
+        logger.debug('Request failed: %s', err);
     }
 
     if (res.headersSent) {

@@ -21,19 +21,42 @@ persistence:
     storage: ':memory:'
 
 logging:
+  transports:
+    sentry:
+      module: sentry
+      dsn: https://a7da0ab444914a3881f7557170290009@sentry.dhatim.it/17
+      level: error
   loggers:
     sql:
-      transports: [console]
+      transports: [console, sentry]
       level: debug
     http:
-      transports: [console]
+      transports: [console, sentry]
       level: debug
     email:
-      transports: [console]
+      transports: [console, sentry]
       level: debug
     login:
-      transports: [console]
+      transports: [console, sentry]
       level: debug
     sso:
-      transports: [console]
+      transports: [console, sentry]
       level: debug
+
+#logging:
+#  loggers:
+#    sql:
+#      transports: [console]
+#      level: debug
+#    http:
+#      transports: [console]
+#      level: debug
+#    email:
+#      transports: [console]
+#      level: debug
+#    login:
+#      transports: [console]
+#      level: debug
+#    sso:
+#      transports: [console]
+#      level: debug
