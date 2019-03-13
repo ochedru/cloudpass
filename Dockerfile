@@ -3,7 +3,11 @@ FROM node:10-alpine
 ENV NODE_ENV=production
 ENV NODE_APP_INSTANCE=docker
 
-RUN apk add --no-cache git
+RUN apk update \
+	&& apk add --no-cache openssl \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& rm -rf /var/cache/apk/*
+
 RUN mkdir -p /app
 WORKDIR /app
 COPY package.json .
