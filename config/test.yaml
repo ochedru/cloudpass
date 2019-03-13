@@ -26,21 +26,26 @@ logging:
       module: sentry
       dsn: https://a7da0ab444914a3881f7557170290009@sentry.dhatim.it/17
       level: error
+    graylog:
+      module: graylog_ovh
+      graylogHost: gra2.logs.ovh.com
+      graylogOvhTokenValue: 6b6c4303-8bb8-4821-9b8f-d7af4f327804
+      level: info
   loggers:
     sql:
-      transports: [console, sentry]
+      transports: [console, sentry, graylog]
       level: debug
     http:
-      transports: [console, sentry]
+      transports: [console, sentry, graylog]
       level: debug
     email:
-      transports: [console, sentry]
+      transports: [console, sentry, graylog]
       level: debug
     login:
-      transports: [console, sentry]
+      transports: [console, sentry, graylog]
       level: debug
     sso:
-      transports: [console, sentry]
+      transports: [console, sentry, graylog]
       level: debug
 
 #logging:
