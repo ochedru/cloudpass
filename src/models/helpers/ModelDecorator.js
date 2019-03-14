@@ -13,7 +13,7 @@ const defaultClassMethods = {
              function(instance, v, k){
                  if(v.href){
                      //turn hrefs into instances
-                     var refInstance = hrefHelper.resolveHref(v.href);
+                     const refInstance = hrefHelper.resolveHref(v.href);
                      ApiError.assert(refInstance, ApiError, 400, 2002, '%s href has an invalid value', k);
                      //if the object corresponds to an association, set the corresponding foreign key
                      if(this.associations[k]){
@@ -29,7 +29,7 @@ const defaultClassMethods = {
     },
     addFindAndCount: function(target, transformOptions, as = target.options.name.plural){
         //pseudo association defined by custom accessors
-        var accessorTypes = {get: 'findAll', count: 'count'};
+        const accessorTypes = {get: 'findAll', count: 'count'};
         _.set(
              this,
              `customAssociations.${as}`,
@@ -51,7 +51,7 @@ const defaultInstanceMethods = {
     toJSON: function () {
         //"clean" the object to not expand unwanted associations
         this.dataValues = _.pick(this.dataValues, _.keys(this.constructor.attributes));
-        var values = this.get();
+        const values = this.get();
         [this.constructor.associations, this.constructor.customAssociations].forEach(function(associations){
             _.forOwn(
             associations,

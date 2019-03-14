@@ -1,15 +1,15 @@
-var assert = require("assert");
-var init = require('./init');
-var BluebirdPromise = require('sequelize').Promise;
-var jwt = BluebirdPromise.promisifyAll(require('jsonwebtoken'));
-var readFile = BluebirdPromise.promisify(require("fs").readFile);
-var request = require('supertest');
-var url = require('url');
+const assert = require("assert");
+const init = require('./init');
+const BluebirdPromise = require('sequelize').Promise;
+const jwt = BluebirdPromise.promisifyAll(require('jsonwebtoken'));
+const readFile = BluebirdPromise.promisify(require("fs").readFile);
+const request = require('supertest');
+const url = require('url');
 
 describe('SAML', function(){
-    var idpSsoLoginUrl = 'http://idp.example.com/login';
-    var idpSsoLogoutUrl = 'http://idp.example.com/logout';
-    var directoryId;
+    const idpSsoLoginUrl = 'http://idp.example.com/login';
+    const idpSsoLogoutUrl = 'http://idp.example.com/logout';
+    let directoryId;
     describe('directory creation', function(){
         it('specifying providerId = "saml" should create a SAML directory', function(){
             return readFile(__dirname + '/resources/saml/idp.crt', 'utf8')
@@ -40,7 +40,7 @@ describe('SAML', function(){
     });
 
     describe('Service Provider Metadata', function(){
-        var samlServiceProviderMetadataId;
+        let samlServiceProviderMetadataId;
         before(function(){
             return init.getRequest('directories/' + directoryId + '/provider')
                 .query({expand: 'samlServiceProviderMetadata'})
@@ -72,7 +72,7 @@ describe('SAML', function(){
     });
 
     describe('Attribute Statement Mapping Rules', function(){
-        var attributeStatementMappingRulesId;
+        let attributeStatementMappingRulesId;
         before(function(){
             return init.getRequest('directories/' + directoryId + '/provider')
                 .query({expand: 'attributeStatementMappingRules'})
@@ -91,7 +91,7 @@ describe('SAML', function(){
         });
 
         it('Attributes can be mapped to Account and CustomData fields', function(){
-            var mappingItems = [
+            const mappingItems = [
                 {
                     name: "firstName",
                     accountAttributes: ['givenName']
@@ -124,7 +124,7 @@ describe('SAML', function(){
     });
 
     describe('application', function(){
-        var applicationId;
+        let applicationId;
         before(function(){
             //create an application an map it the the SAML directory
             return init.postRequest('applications')
@@ -181,15 +181,15 @@ describe('SAML', function(){
 
         describe('authentication', function(){
 
-            var callbackUrl = 'http://www.example.com/callback';
+            const callbackUrl = 'http://www.example.com/callback';
 
             function mockIdPResponse(idPRequestUrl, responseFileName, expectedCompanyName){
                 assert(idPRequestUrl);
                 assert(idPRequestUrl.startsWith(idpSsoLoginUrl));
-                var parsed = url.parse(idPRequestUrl, true);
+                const parsed = url.parse(idPRequestUrl, true);
                 assert(parsed.query.SAMLRequest);
                 assert(parsed.query.RelayState);
-                var relayState = parsed.query.RelayState;
+                const relayState = parsed.query.RelayState;
                 return readFile(__dirname + '/resources/saml/'+responseFileName, 'utf8')
                         .then(function(samlResponse){
                             //mock an IdP response
@@ -243,7 +243,7 @@ describe('SAML', function(){
 
             it('with account store', function(){
                 //create an organization and map it the the SAML application
-                var organizationName = init.randomName();
+                const organizationName = init.randomName();
                 return init.postRequest('organizations')
                     .send({
                         name: organizationName,
@@ -280,9 +280,9 @@ describe('SAML', function(){
                             .expect(302);
                     })
                     .then(function(res){
-                        var locationStart = callbackUrl+'?jwtResponse=';
+                        const locationStart = callbackUrl+'?jwtResponse=';
                         assert(res.header.location.startsWith(callbackUrl+'?jwtResponse='));
-                        var jwtResponse = res.header.location.substring(locationStart.length);
+                        const jwtResponse = res.header.location.substring(locationStart.length);
                         return jwt.verifyAsync(jwtResponse, init.apiKey.secret);
                     })
                     .then(function(payload){

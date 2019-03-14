@@ -1,9 +1,9 @@
 "use strict";
 
-var _ =require('lodash');
-var accountStoreController = require('../helpers/accountStoreController');
-var models = require('../../models');
+const _ =require('lodash');
+const accountStoreController = require('../helpers/accountStoreController');
+const models = require('../../models');
 
-var controller = accountStoreController(models.organization, ['delete']);
+const controller = accountStoreController(models.organization, ['delete']);
 controller.getIdSiteModel = _.partial(controller.getComputedSubResource, 'getIdSiteModel');
 module.exports = controller;

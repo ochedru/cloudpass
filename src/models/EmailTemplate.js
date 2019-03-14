@@ -68,7 +68,7 @@ module.exports = function (sequelize, DataTypes) {
                 indexes: [{ fields: ['policyId', 'tenantId'] }],
                 getterMethods: {
                     defaultModel: function(){
-                        var linkBaseUrl = this.get('linkBaseUrl', {role: 'defaultModel'});
+                        const linkBaseUrl = this.get('linkBaseUrl', {role: 'defaultModel'});
                         return linkBaseUrl? {linkBaseUrl : linkBaseUrl}: undefined;
                     }
                 },
@@ -81,7 +81,7 @@ module.exports = function (sequelize, DataTypes) {
                 },
                 instanceMethods: {
                     getUrlTokens : function(cpToken){
-                        var cpTokenNameValuePair = 'cpToken='+cpToken;
+                        const cpTokenNameValuePair = 'cpToken='+cpToken;
                         return{
                             url: this.get('linkBaseUrl', {role: 'defaultModel'}) + '?'+cpTokenNameValuePair,
                             cpToken: cpToken,
@@ -99,7 +99,7 @@ module.exports = function (sequelize, DataTypes) {
     )
     .withInstanceMethods({
         getUrlTokens : function(cpToken){
-            var cpTokenNameValuePair = 'cpToken='+cpToken;
+            const cpTokenNameValuePair = 'cpToken='+cpToken;
             return{
                 url: this.get('linkBaseUrl', {role: 'defaultModel'}) + '?'+cpTokenNameValuePair,
                 cpToken: cpToken,

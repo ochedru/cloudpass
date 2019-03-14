@@ -1,45 +1,43 @@
 "use strict";
 
 const Transport = require('winston-transport');
-const tls = require("tls");
+const tls = require('tls');
 const pjson = require('../../../package.json');
 const config = require('config');
 
 const MESSAGE_LEVEL = {
-    "silly":   7,
-    "debug":   7,
-    "verbose": 6,
-    "data":    6,
-    "prompt":  6,
-    "input":   6,
-    "info":    6,
-    "help":    5,
-    "notice":  5,
-    "warn":    5,
-    "warning": 5,
-    "error":   3,
-    "crit":    2,
-    "alert":   1,
-    "emerg":   0
+    'silly': {value: 7, name: 'debug'},
+    'debug': {value: 7, name: 'debug'},
+    'verbose': {value: 7, name: 'debug'},
+    'data': {value: 7, name: 'debug'},
+    'prompt': {value: 6, name: 'info'},
+    'input': {value: 6, name: 'info'},
+    'info': {value: 6, name: 'info'},
+    'help': {value: 5, name: 'notice'},
+    'notice': {value: 5, name: 'notice'},
+    'warn': {value: 4, name: 'warning'},
+    'warning': {value: 4, name: 'warning'},
+    'error': {value: 3, name: 'error'},
+    'crit': {value: 2, name: 'critical'},
+    'alert': {value: 1, name: 'alert'},
+    'emerg': {value: 0, name: 'emergency'}
 };
 
 class Message {
-
-    constructor(winstonLevel, msg, meta) {
-        this.level = Message.getMessageLevel(winstonLevel);
-        this.meta = meta;
-        this.msg = msg;
-    }
-
-    getMessageLevel(winstonLevel) {
-        return Message.getMessageLevel(winstonLevel);
-    }
-
-    static getMessageLevel(winstonLevel) {
-        if (MESSAGE_LEVEL.hasOwnProperty(winstonLevel)) {
-            return MESSAGE_LEVEL[winstonLevel];
+    constructor(info) {
+        let winstonLevel = info.level;
+        if (!MESSAGE_LEVEL.hasOwnProperty(winstonLevel)) {
+            winstonLevel = 'info';
         }
-        return 6;
+        const level = MESSAGE_LEVEL[winstonLevel];
+        this.level = level.value;
+        this.severity = level.name;
+        this.logger = info.label;
+        this.tags = Object.assign({}, info.tags);
+        this.msg = info.message;
+        if (info.error) {
+            this.stack = info.error.stack || info.error.toString();
+        }
     }
 }
 
@@ -50,16 +48,16 @@ class GraylogOvhTransport extends Transport {
         const extendedOptions = Object.assign({
             level: 'info',
             silent: false,
-            autoReconnect: false,
+            autoReconnect: true,
             graylogHost: 'discover.logs.ovh.com',
             graylogPort: 12202,
             graylogHostname: require('os').hostname(),
-            graylogFlag: 'no_flag',
             graylogOvhTokenKey: 'X-OVH-TOKEN',
             graylogOvhTokenValue: 'no_value',
             handleExceptions: false,
             version: pjson.version,
-            environment: config.environment
+            environment: config.environment,
+            graylogFacility: 'cloudpass'
         }, options);
         Object.keys(extendedOptions).forEach(key => {
             this[key] = extendedOptions[key];
@@ -70,7 +68,8 @@ class GraylogOvhTransport extends Transport {
     }
 
     getSocket(callback) {
-        callback = (typeof callback === "function") ? callback : function () {};
+        callback = (typeof callback === 'function') ? callback : function () {
+        };
         if (this.clientReady() || this.connecting) {
             callback();
             return;
@@ -85,9 +84,9 @@ class GraylogOvhTransport extends Transport {
             callback();
         });
 
-        this.client.on("error", (err) => {
+        this.client.on('error', (err) => {
             this.client.end();
-            console.log("[FATAL LOGGER]", err);
+            console.log('[FATAL LOGGER]', err);
             if (this.autoReconnect) {
                 delete this.connecting;
                 this.client = null;
@@ -120,42 +119,40 @@ class GraylogOvhTransport extends Transport {
     }
 
     getStrMessage(message) {
-        var graylogMessage = {
-            version:       "1.1",
-            timestamp:     Math.round(new Date() / 1000),
-            host:          this.graylogHostname,
-            facility:      this.graylogFacility,
-            flag:          this.graylogFlag,
-            level:         message.level,
-            short_message: message.msg
+        const graylogMessage = {
+            version: '1.1',
+            timestamp: new Date() / 1000.0,
+            host: this.graylogHostname,
+            facility: this.graylogFacility,
+            environment: this.environment,
+            _version: this.version,
+            level: message.level,
+            severity: message.severity,
+            logger: message.logger,
+            short_message: message.msg,
+            full_message: message.msg
         };
-
         if (this.graylogOvhTokenKey && this.graylogOvhTokenKey.length) {
             graylogMessage[this.graylogOvhTokenKey] = this.graylogOvhTokenValue;
         }
-
-        if (message.meta) {
-            Object.keys(message.meta).forEach(key => {
-                if (key !== "id") {
-                    graylogMessage[key] = JSON.stringify(message.meta[key]);
+        if (message.stack) {
+            graylogMessage.stack = message.stack;
+        }
+        if (message.tags && Object.keys(message.tags).length > 0) {
+            Object.keys(message.tags).forEach(key => {
+                if (key !== 'id') {
+                    graylogMessage[key] = JSON.stringify(message.tags[key]);
                 }
             });
-            graylogMessage.full_message = JSON.stringify(message.meta);
         }
-
-        return JSON.stringify(graylogMessage) + "\u0000";
+        return JSON.stringify(graylogMessage) + '\u0000';
     }
 
     log(info, done) {
         if (this.silent) {
             return done(null, true);
         }
-        const tags = Object.assign({
-            version: this.release,
-            environment: this.environment
-        }, info.tags);
-        var message = new Message(info.level, info.message, tags);
-
+        const message = new Message(info);
         this.getSocket(() => {
             this.sendMessage(message);
         });

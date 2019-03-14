@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const Health = require('health-checkup');
-var appInfo = require("node-appinfo")();
+const appInfo = require("node-appinfo")();
 const express = require('express');
 const models = require('../models');
 

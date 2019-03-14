@@ -1,8 +1,8 @@
 "use strict";
 
-var samlHelper = require('../helpers/samlHelper');
-var models = require('../../models');
-var ApiError = require('../../ApiError');
+const samlHelper = require('../helpers/samlHelper');
+const models = require('../../models');
+const ApiError = require('../../ApiError');
 
 exports.get = function(req, res){
     // SAML service provider ID = application ID

@@ -1,6 +1,6 @@
 'use strict';
 
-var signJwt = require('sequelize').Promise.promisify(require('jsonwebtoken').sign);
+const signJwt = require('sequelize').Promise.promisify(require('jsonwebtoken').sign);
 
 // returns an JWT response that can be used by the application to authenticate a user
 exports.getJwtResponse = (apiKey, accountHref, payload) => signJwt(
@@ -34,9 +34,9 @@ exports.getSecuritySettingsScope = accountId => ({
 });
 
 exports.getAccountOrganizationsScope = accountId => ({
-   accounts: {
-       [accountId]: {
-           organizations: ['get']
-       }
-   }
+    accounts: {
+        [accountId]: {
+            organizations: ['get']
+        }
+    }
 });

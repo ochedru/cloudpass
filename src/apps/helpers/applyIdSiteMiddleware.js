@@ -1,15 +1,15 @@
 'use strict';
 
-var _ = require('lodash');
-var BluebirdPromise = require('sequelize').Promise;
-var signJwt = BluebirdPromise.promisify(require('jsonwebtoken').sign);
-var shimmer = require('shimmer');
-var Optional = require('optional-js');
-var getApiKey = require('./getApiKey');
-var idSiteHelper = require('./idSiteHelper');
-var models = require('../../models');
-var hrefHelper = require('../../helpers/hrefHelper');
-var scopeHelper = require('../../helpers/scopeHelper');
+const _ = require('lodash');
+const BluebirdPromise = require('sequelize').Promise;
+const signJwt = BluebirdPromise.promisify(require('jsonwebtoken').sign);
+const shimmer = require('shimmer');
+const Optional = require('optional-js');
+const getApiKey = require('./getApiKey');
+const idSiteHelper = require('./idSiteHelper');
+const models = require('../../models');
+const hrefHelper = require('../../helpers/hrefHelper');
+const scopeHelper = require('../../helpers/scopeHelper');
 
 function applyToIdSiteRequests(middleware) {
     return function (req, res) {
@@ -34,7 +34,7 @@ function setAuthorizationBearer(req, res) {
 }
 
 //send an updated Authorization header
-var updateBearer = applyToIdSiteRequests(function (req, res) {
+const updateBearer = applyToIdSiteRequests(function (req, res) {
     return setAuthorizationBearer(req, res)
         .then(req.next)
         .catch(req.next);
@@ -42,7 +42,7 @@ var updateBearer = applyToIdSiteRequests(function (req, res) {
 
 //set a special header instead of redirecting directly
 //because ID sites use ajax calls to request cloudpass
-var handleRedirects = applyToIdSiteRequests(function (req, res) {
+const handleRedirects = applyToIdSiteRequests(function (req, res) {
     shimmer.wrap(res, 'redirect', _.constant(
         function (redirectUrl) {
             this.set('Access-Control-Expose-Headers', ['Stormpath-SSO-Redirect-Location'])
@@ -53,14 +53,14 @@ var handleRedirects = applyToIdSiteRequests(function (req, res) {
     req.next();
 });
 
-var afterAuthentication = function (accountHrefGetter, isNewSub, factorTypeGetter, orgHrefGetter) {
+const afterAuthentication = function (accountHrefGetter, isNewSub, factorTypeGetter, orgHrefGetter) {
     return applyToIdSiteRequests(function (req, res) {
         shimmer.wrap(res, 'json', function (original) {
             return function (result) {
                 //check if an account has been returned
                 let accountHref = accountHrefGetter(result, req);
                 if (accountHref) {
-                    var accountId = /\/accounts\/(.*)$/.exec(accountHref)[1];
+                    const accountId = /\/accounts\/(.*)$/.exec(accountHref)[1];
                     //request a 2nd factor if the user is not already authenticated
                     // and the user already configured any or the application requested it
                     BluebirdPromise.resolve(
@@ -78,7 +78,7 @@ var afterAuthentication = function (accountHrefGetter, isNewSub, factorTypeGette
                             )
                     )
                         .then(requireMfa => {
-                            var secondFactor = Optional.ofNullable(factorTypeGetter)
+                            const secondFactor = Optional.ofNullable(factorTypeGetter)
                                 .map(_.method('call', null, result))
                                 .orElse(req.authInfo.verified_mfa);
                             //ask for a second factor if requested
@@ -173,7 +173,7 @@ var afterAuthentication = function (accountHrefGetter, isNewSub, factorTypeGette
     });
 };
 
-var suppressOutput = applyToIdSiteRequests(function (req, res) {
+const suppressOutput = applyToIdSiteRequests(function (req, res) {
     shimmer.wrap(res, 'json', original => function () {
         return original.call(this, {});
     });
@@ -181,7 +181,7 @@ var suppressOutput = applyToIdSiteRequests(function (req, res) {
 });
 
 //remove the current path from the scope if the request was successful
-var alterScope = function (newPathsGetter) {
+const alterScope = function (newPathsGetter) {
     return applyToIdSiteRequests(function (req, res) {
         shimmer.wrap(res, 'json', function (original) {
             return function (result) {
@@ -200,13 +200,13 @@ var alterScope = function (newPathsGetter) {
 };
 
 //remove the current path from the scope if the request was successful
-var removeCurrentPathFromScope = alterScope((oldPaths, req) => _.omit(oldPaths, req.path));
+const removeCurrentPathFromScope = alterScope((oldPaths, req) => _.omit(oldPaths, req.path));
 //remove paths to the scope if the request was successful
-var addPathsToScope = function (newPathsGetter) {
+const addPathsToScope = function (newPathsGetter) {
     return alterScope((oldPaths, req, result) => _.merge(oldPaths, newPathsGetter(result, req)));
 };
 
-var hideFactorSecrets = applyToIdSiteRequests(function (req, res) {
+const hideFactorSecrets = applyToIdSiteRequests(function (req, res) {
     shimmer.wrap(res, 'json', function (original) {
         return function (result) {
             result.items.forEach(_.unary(_.partial(_.assign, _, {secret: null, keyUri: null, base64QRImage: null})));

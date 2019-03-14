@@ -1,21 +1,21 @@
-var assert = require("assert");
-var getMandrillFields = require('rewire')('../../src/helpers/email').__get__('getMandrillFields');
+const assert = require("assert");
+const getMandrillFields = require('rewire')('../../src/helpers/email').__get__('getMandrillFields');
 
-describe('send', function(){
-    it('getMandrillFields', function(){
-        var templateName = 'template-name';
+describe('send', function () {
+    it('getMandrillFields', function () {
+        const templateName = 'template-name';
         assert.deepStrictEqual(
             getMandrillFields(
                 templateName,
                 {
-                        a:1,
-                        b:{
-                            c: true,
-                            d: {
-                                e: 'f'
-                            }
+                    a: 1,
+                    b: {
+                        c: true,
+                        d: {
+                            e: 'f'
                         }
                     }
+                }
             ),
             {
                 subject: null,
@@ -25,7 +25,7 @@ describe('send', function(){
                 mandrillOptions: {
                     template_name: templateName,
                     template_content: [],
-                    message:{
+                    message: {
                         global_merge_vars: [
                             {
                                 name: 'a',

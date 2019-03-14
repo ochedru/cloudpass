@@ -1,24 +1,23 @@
 "use strict";
 
-var BluebirdPromise = require('sequelize').Promise;
-var _ = require('lodash');
-var winston = require('winston');
-var controllerHelper = require('../helpers/controllerHelper');
-var accountStoreController = require('../helpers/accountStoreController');
-var accountHelper = require('../helpers/accountHelper');
-var samlHelper = require('../helpers/samlHelper');
-var email = require('../../helpers/email');
-var models = require('../../models');
-var ApiError = require('../../ApiError');
+const BluebirdPromise = require('sequelize').Promise;
+const _ = require('lodash');
+const controllerHelper = require('../helpers/controllerHelper');
+const accountStoreController = require('../helpers/accountStoreController');
+const accountHelper = require('../helpers/accountHelper');
+const samlHelper = require('../helpers/samlHelper');
+const email = require('../../helpers/email');
+const models = require('../../models');
+const ApiError = require('../../ApiError');
+const logger = require('../../helpers/loggingHelper').logger;
 
-let logger = winston.loggers.get('login');
-let controller = accountStoreController(models.application);
+const controller = accountStoreController(models.application);
 
 controller.getIdSiteModel = _.partial(controller.getComputedSubResource, 'getIdSiteModel');
 controller.getSamlPolicy = _.partial(controller.getComputedSubResource, 'getSamlPolicy');
 
 controller.create = function(req, res) {
-  var attributes = _.pick(req.swagger.params.attributes.value, models.application.settableAttributes);
+  const attributes = _.pick(req.swagger.params.attributes.value, models.application.settableAttributes);
   attributes.tenantId = req.user.tenantId;
 
   controllerHelper.queryAndExpand(
@@ -26,7 +25,7 @@ controller.create = function(req, res) {
     .create(attributes)
     .tap(function(application) {
       //create a directory if requested
-      var createDirectory = req.swagger.params.createDirectory.value;
+      let createDirectory = req.swagger.params.createDirectory.value;
       if (createDirectory) {
         if (createDirectory === "true") {
           //TODO pick a name that does not already exist
@@ -57,13 +56,13 @@ controller.create = function(req, res) {
 };
 
 controller.authenticate = function(req, res) {
-  var attempt = req.swagger.params.attempt.value;
-  var decodedValue = Buffer.from(attempt.value, 'base64').toString('utf8');
-  var delimiterIndex = decodedValue.indexOf(':');
+  const attempt = req.swagger.params.attempt.value;
+  const decodedValue = Buffer.from(attempt.value, 'base64').toString('utf8');
+  const delimiterIndex = decodedValue.indexOf(':');
   ApiError.assert(delimiterIndex > 0, ApiError, 400, 400, 'Invalid value');
-  var applicationId = req.swagger.params.id.value;
-  var login = decodedValue.substring(0, delimiterIndex);
-  var password = decodedValue.substring((delimiterIndex + 1));
+  const applicationId = req.swagger.params.id.value;
+  const login = decodedValue.substring(0, delimiterIndex);
+  const password = decodedValue.substring((delimiterIndex + 1));
 
   accountHelper.authenticateAccount(
       login,
@@ -75,9 +74,9 @@ controller.authenticate = function(req, res) {
     .then(function(account) {
       res.json(expandAccountActionResult(account, req.swagger.params.expand.value));
     })
-    .tap(() => logger.info('%s successfully logged in to application %s', login, applicationId, {username: login, applicationId, action_status: 'login successul'}))
+    .tap(() => logger('audit').info('%s successfully logged in to application %s', login, applicationId, {username: login, applicationId, action_status: 'login successul'}))
     .catch(e => {
-        logger.info('%s failed to log in to application %s (reason: %s)', login, applicationId, e.message, {username: login, applicationId, action_status: 'login failed', reason: e.message});
+        logger('audit').warn('%s failed to log in to application %s (reason: %s)', login, applicationId, e.message, {username: login, applicationId, action_status: 'login failed', reason: e.message});
         req.next(e);
     });
 };
@@ -108,7 +107,7 @@ controller.createPasswordResetToken = function(req, res) {
             ApiError.assert(directory.passwordPolicy.resetEmailStatus === 'ENABLED', ApiError, 400, 400, 'the password reset workflow is not enabled');
 
             //create a new token
-            var tokenExpiryDate = new Date();
+            const tokenExpiryDate = new Date();
             tokenExpiryDate.setHours(tokenExpiryDate.getHours() + directory.passwordPolicy.resetTokenTtl);
 
             return models.passwordResetToken.create({

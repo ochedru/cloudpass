@@ -1,8 +1,8 @@
-var config = require('config');
-var compression = require('compression');
-var express = require('express');
+const config = require('config');
+const compression = require('compression');
+const express = require('express');
 
-var app = express();
+const app = express();
 app.use(compression());
 app.use(express.static(config.get('server.uiFolder')));
 module.exports = app;

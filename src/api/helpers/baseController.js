@@ -1,9 +1,9 @@
 "use strict";
 
-var _ = require('lodash');
-var controllerHelper = require('./controllerHelper');
-var ApiError = require('../../ApiError');
-var models = require('../../models');
+const _ = require('lodash');
+const controllerHelper = require('./controllerHelper');
+const ApiError = require('../../ApiError');
+const models = require('../../models');
 
 module.exports = function (model, transactionalMethods) {
     return {

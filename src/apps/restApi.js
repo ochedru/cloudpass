@@ -1,26 +1,26 @@
 'use strict';
 
-var express = require('express');
-var morgan = require('morgan');
-var nocache = require('nocache');
-var bodyParser = require('body-parser');
-var config = require('config');
-var BluebirdPromise = require('sequelize').Promise;
-var _ = require('lodash');
-var passport = require('passport');
-var Optional = require('optional-js');
-var BasicStrategy = require('passport-http').BasicStrategy;
-var JwtCookieComboStrategy = require('passport-jwt-cookiecombo');
-var authorization = require('auth-header');
-var winston = require('winston');
-var SAuthc1Strategy = require('./authentication/SAuthc1Strategy');
-var JwtStrategy = require('./authentication/JwtStrategy');
-var scopeChecker = require('./helpers/scopeChecker');
-var SwaggerExpress = BluebirdPromise.promisifyAll(require('swagger-express-mw'));
-var getApiKey = require('./helpers/getApiKey');
-var ssaclAuthenticate = require('./helpers/ssaclAuthenticate');
-var applyIdSiteMiddleware = require('./helpers/applyIdSiteMiddleware');
-var errorHandler = require('./helpers/errorHandler');
+const express = require('express');
+const morgan = require('morgan');
+const nocache = require('nocache');
+const bodyParser = require('body-parser');
+const config = require('config');
+const BluebirdPromise = require('sequelize').Promise;
+const _ = require('lodash');
+const passport = require('passport');
+const Optional = require('optional-js');
+const BasicStrategy = require('passport-http').BasicStrategy;
+const JwtCookieComboStrategy = require('passport-jwt-cookiecombo');
+const authorization = require('auth-header');
+const SAuthc1Strategy = require('./authentication/SAuthc1Strategy');
+const JwtStrategy = require('./authentication/JwtStrategy');
+const scopeChecker = require('./helpers/scopeChecker');
+const SwaggerExpress = BluebirdPromise.promisifyAll(require('swagger-express-mw'));
+const getApiKey = require('./helpers/getApiKey');
+const ssaclAuthenticate = require('./helpers/ssaclAuthenticate');
+const applyIdSiteMiddleware = require('./helpers/applyIdSiteMiddleware');
+const errorHandler = require('./helpers/errorHandler');
+const logger = require('../helpers/loggingHelper').logger;
 
 module.exports = function (secret) {
 
@@ -97,11 +97,10 @@ module.exports = function (secret) {
         })
         .then(function (swaggerExpress) {
 
-            var app = express();
-            const logger = winston.loggers.get('http');
+            const app = express();
             app.use(morgan('tiny', {
                 stream: {
-                    write: message => message.split('\n').filter(l => l.length > 0).forEach(l => logger.info(l))
+                    write: message => message.split('\n').filter(l => l.length > 0).forEach(l => logger('http').info(l))
                 }
             }));
             //Sauthc1 needs the raw body

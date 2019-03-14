@@ -17,7 +17,7 @@ module.exports = loadLoggingConfig(config.get('logging'))
     .then(function () {
         if (cluster.isMaster) {
             //run pending migrations and fork clusters
-            var secret = config.get('server.secret') || randomstring.generate(50);
+            const secret = config.get('server.secret') || randomstring.generate(50);
             return require('./models').migrate()
                 .then(function () {
                     if (config.get('server.clustering') && numCPUs > 1) {

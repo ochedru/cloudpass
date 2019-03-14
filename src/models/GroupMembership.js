@@ -1,6 +1,7 @@
 "use strict";
 
 const ModelDecorator = require('./helpers/ModelDecorator');
+//const logger = require('../helpers/loggingHelper').logger;
 
 module.exports = function (sequelize, DataTypes) {
     return new ModelDecorator(
@@ -18,7 +19,15 @@ module.exports = function (sequelize, DataTypes) {
                 indexes: [{
                     unique: true,
                     fields: ['accountId', 'groupId']
-                }]
+                }],
+                hooks: {
+                    afterCreate: function (instance) {
+                        console.log(instance);
+                    },
+                    afterDestroy: function (instance) {
+                        console.log(instance);
+                    }
+                }
             }
         )
     )

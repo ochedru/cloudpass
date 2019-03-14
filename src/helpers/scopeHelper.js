@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require('lodash');
+const _ = require('lodash');
 
 //get the scope of requests an ID site is allowed to make with its bearer token
 exports.getIdSiteScope = function(...modelInstances) {

@@ -1,12 +1,12 @@
-var assert = require("assert");
-var models = require('../../src/models');
-var addAccountStoreAccessors = require('rewire')('../../src/models/helpers/addAccountStoreAccessors');
+const assert = require("assert");
+const models = require('../../src/models');
+const addAccountStoreAccessors = require('rewire')('../../src/models/helpers/addAccountStoreAccessors');
 
-describe('addAccountStoreAccessors', function(){
-    describe('findPaths', function(){
-        var findPaths = addAccountStoreAccessors.__get__('findPaths');
-        it('should correctly find how two account stores are connected', function(){
-            
+describe('addAccountStoreAccessors', function () {
+    describe('findPaths', function () {
+        const findPaths = addAccountStoreAccessors.__get__('findPaths');
+        it('should correctly find how two account stores are connected', function () {
+
             //3 ways to connect an organization to an account
             assert.deepStrictEqual(
                 findPaths(models.organization, models.account),
@@ -33,7 +33,7 @@ describe('addAccountStoreAccessors', function(){
                     ]
                 ]
             );
-    
+
             //6 ways to connect an account to an application
             assert.deepStrictEqual(
                 findPaths(models.account, models.application),

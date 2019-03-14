@@ -1,9 +1,9 @@
-var assert = require("assert");
-var init = require('./init');
+const assert = require("assert");
+const init = require('./init');
 
 describe('resource CRUD', function () {
-    var directoryName = "test directory";
-    var directoryId;
+    const directoryName = "test directory";
+    let directoryId;
 
     it('creation', function () {
         return init.postRequest('directories')

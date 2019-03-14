@@ -12,14 +12,13 @@ const models = require('../../models');
 const sendJwtResponse = require('../../apps/helpers/sendJwtResponse');
 const ApiError = require('../../ApiError');
 const hrefHelper = require('../../helpers/hrefHelper');
-const winston = require('winston');
-const logger = winston.loggers.get('sso');
+const logger = require('../../helpers/loggingHelper').logger;
 const isemail = require('isemail');
 
-var controller = accountStoreController(models.directory, ['create', 'delete']);
+const controller = accountStoreController(models.directory, ['create', 'delete']);
 
 controller.create = function (req, res) {
-    var attributes = req.swagger.params.attributes.value;
+    const attributes = req.swagger.params.attributes.value;
     controllerHelper.queryAndExpand(
         () => controllerHelper.create(
             models.directory,
@@ -94,7 +93,7 @@ function getEmail(samlResponse) {
                     return _.toLower(user.attributes[key]);
                 }
             }
-            logger.error('cannot find user email in SAML response: %s', JSON.stringify(samlResponse));
+            logger('sso').error('cannot find user email in SAML response: %s', JSON.stringify(samlResponse));
             throw new ApiError(400, 400, "User email not found in SAML assertion");
         }
     }
@@ -113,9 +112,9 @@ controller.consumeSamlAssertion = function (req, res) {
         )
         .spread((samlResponse, mappingRules) =>
             models.sequelize.requireTransaction(() => {
-                logger.debug('incoming SAML response: %s', JSON.stringify(samlResponse));
+                logger('sso').debug('incoming SAML response: %s', JSON.stringify(samlResponse));
                 const email = getEmail(samlResponse);
-                logger.debug('found email from SAML response: %s', email);
+                logger('sso').debug('found email from SAML response: %s', email);
                 return models.account.findOrCreate({
                     where: {
                         email: email,
@@ -128,7 +127,7 @@ controller.consumeSamlAssertion = function (req, res) {
                     }
                 })
                     .spread((account, created) => {
-                        logger.debug('found account from SAML response: %s', account.id);
+                        logger('sso').debug('found account from SAML response: %s', account.id);
                         const providerData = _.defaults({providerId: 'saml'}, _.mapValues(samlResponse.user.attributes, _.head));
                         const application = hrefHelper.resolveHref(req.authInfo.app_href);
                         return BluebirdPromise.join(

@@ -1,9 +1,9 @@
 "use strict";
 
-var ExtendableError = require('es6-error');
-var _ = require('lodash');
-var util = require('util');
-var thr = require('throw');
+const ExtendableError = require('es6-error');
+const _ = require('lodash');
+const util = require('util');
+const thr = require('throw');
 
 class ApiError extends ExtendableError{
     constructor(status, code, message, ...messageParams) {

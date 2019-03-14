@@ -1,15 +1,15 @@
 'use strict';
 
-var passport = require('passport');
-var ApiError = require('../../ApiError.js');
+const passport = require('passport');
+const ApiError = require('../../ApiError.js');
 
 //authenticate the user and call the following middlewares with the actor set in SAACL CLS.
-module.exports = function(...strategies){
+module.exports = function (...strategies) {
     return function (req, res, next) {
         //don't authenticate for CORS 'OPTIONS' requests
         //or if the user is already authenticated by previous middlewares
-        if(req.method === 'OPTIONS' || req.user){
-          next();
+        if (req.method === 'OPTIONS' || req.user) {
+            next();
         } else {
             passport.authenticate(
                 strategies,
@@ -24,8 +24,8 @@ module.exports = function(...strategies){
                     }
                     req.user = user;
                     req.authInfo = info;
-                    var ssaclCls = req.app.get('ssaclCls');
-                    ssaclCls.run(function(){
+                    const ssaclCls = req.app.get('ssaclCls');
+                    ssaclCls.run(function () {
                         ssaclCls.set('actor', user.tenantId);
                         next();
                     });

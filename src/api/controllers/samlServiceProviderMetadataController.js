@@ -1,13 +1,13 @@
 "use strict";
 
-var shimmer = require('shimmer');
-var _ = require('lodash');
-var baseController = require('../helpers/baseController');
-var samlHelper = require('../helpers/samlHelper');
-var models = require('../../models');
-var ApiError = require('../../ApiError');
+const shimmer = require('shimmer');
+const _ = require('lodash');
+const baseController = require('../helpers/baseController');
+const samlHelper = require('../helpers/samlHelper');
+const models = require('../../models');
+const ApiError = require('../../ApiError');
 
-var controller = baseController(models.samlServiceProviderMetadata);
+const controller = baseController(models.samlServiceProviderMetadata);
 
 shimmer.wrap(controller, 'get', function (original) {
     //send regular JSON object or the metadata in SAML XML format

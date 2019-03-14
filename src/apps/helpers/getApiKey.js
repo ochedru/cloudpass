@@ -1,9 +1,9 @@
 "use strict";
 
-var models = require('../../models');
-var ssacl = require('ssacl');
+const models = require('../../models');
+const ssacl = require('ssacl');
 
-module.exports = function(apiKeyId, ...includes){
+module.exports = function (apiKeyId, ...includes) {
     return models.apiKey.findByPk(
         apiKeyId,
         {
@@ -12,9 +12,9 @@ module.exports = function(apiKeyId, ...includes){
                 model: models.account,
                 attributes: [],
                 include: [{
-                        model: models.directory,
-                        attributes: [],
-                        where: {name: 'Cloudpass Administrators'}
+                    model: models.directory,
+                    attributes: [],
+                    where: {name: 'Cloudpass Administrators'}
                 }]
             }].concat(includes)
         }

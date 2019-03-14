@@ -1,10 +1,10 @@
 "use strict";
 
-var saml2 =  require('sequelize').Promise.promisifyAll(require('saml2-js'), {suffix: '_async'});
-var signJwt = require('sequelize').Promise.promisify(require('jsonwebtoken').sign);
-var _ = require('lodash');
+const _ = require('lodash');
+const saml2 = require('sequelize').Promise.promisifyAll(require('saml2-js'), {suffix: '_async'});
+const signJwt = require('sequelize').Promise.promisify(require('jsonwebtoken').sign);
 
-function getSamlProvider(providerMetadata){
+function getSamlProvider(providerMetadata) {
     return new saml2.ServiceProvider({
         entity_id: providerMetadata.entityId,
         private_key: providerMetadata.get('privateKey', {role: 'serviceProvider'}),
@@ -13,7 +13,7 @@ function getSamlProvider(providerMetadata){
     });
 }
 
-function getSamlIdentityProvider(directoryProvider){
+function getSamlIdentityProvider(directoryProvider) {
     return new saml2.IdentityProvider({
         sso_login_url: directoryProvider.ssoLoginUrl,
         sso_logout_url: directoryProvider.ssoLogoutUrl,
@@ -21,35 +21,35 @@ function getSamlIdentityProvider(directoryProvider){
     });
 }
 
-exports.getXmlMetadata = function(providerMetadata){
+exports.getXmlMetadata = function (providerMetadata) {
     return getSamlProvider(providerMetadata).create_metadata();
 };
 
-exports.getLoginRequestUrl = function(provider, relayState){
+exports.getLoginRequestUrl = function (provider, relayState) {
     return getSamlProvider(provider.samlServiceProviderMetadata)
-            .create_login_request_url_async(
-                getSamlIdentityProvider(provider),
-                {
-                    sign_get_request: true,
-                    relay_state: relayState
-                }
-            );
+        .create_login_request_url_async(
+            getSamlIdentityProvider(provider),
+            {
+                sign_get_request: true,
+                relay_state: relayState
+            }
+        );
 };
 
-exports.getSamlResponse = function(provider, requestBody){
+exports.getSamlResponse = function (provider, requestBody) {
     return getSamlProvider(provider.samlServiceProviderMetadata)
-            .post_assert_async(
-                getSamlIdentityProvider(provider),
-                {
-                  request_body: requestBody,
-                  allow_unencrypted_assertion: true,
-                  require_session_index: false,
-                  audience: /.*/
-                }
-            );
+        .post_assert_async(
+            getSamlIdentityProvider(provider),
+            {
+                request_body: requestBody,
+                allow_unencrypted_assertion: true,
+                require_session_index: false,
+                audience: /.*/
+            }
+        );
 };
 
-exports.getRelayState = function(apiKey, content, expiration){
+exports.getRelayState = function (apiKey, content, expiration) {
     return signJwt(
         content,
         apiKey.secret,

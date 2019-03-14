@@ -14,7 +14,7 @@ const hrefHelper = require('../../helpers/hrefHelper');
 exports.getSubAccountStore = function(accountStore, subAccountStoreHref){
     return Optional.ofNullable(subAccountStoreHref)
             .map(ash => {
-                var subAccountStore = hrefHelper.resolveHref(ash);
+                const subAccountStore = hrefHelper.resolveHref(ash);
                 //if account store & sub account store are the same, just return the former
                 if(subAccountStore instanceof accountStore.constructor){
                     ApiError.assert(accountStore.id === subAccountStore.id, ApiError, 400, 2014, 'The provided %s have different ID (%s and %s)', accountStore.constructor.options.name.plural, accountStore.id, subAccountStore.id);
@@ -35,7 +35,7 @@ exports.getSubAccountStore = function(accountStore, subAccountStoreHref){
 
 exports.findCloudAccount = function(login, applicationId, organizationName, accountStoreHref, ...directoryIncludes){
     //username and password are persisted lowercased to allow for case insensitive search
-    var lowerCaseLogin = login.toLowerCase();
+    const lowerCaseLogin = login.toLowerCase();
     return models.application.build({id: applicationId}, {isNewRecord: false})
             .getLookupAccountStore(organizationName)
             .then(as => exports.getSubAccountStore(as, accountStoreHref))

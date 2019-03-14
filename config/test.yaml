@@ -29,24 +29,32 @@ logging:
     graylog:
       module: graylog_ovh
       graylogHost: gra2.logs.ovh.com
-      graylogOvhTokenValue: 6b6c4303-8bb8-4821-9b8f-d7af4f327804
+      graylogOvhTokenValue: 5c2b5cd8-837a-4d2c-a61e-8bdbca90f19a
+      level: debug
+    graylog_audit:
+      module: graylog_ovh
+      graylogHost: gra2.logs.ovh.com
+      graylogOvhTokenValue: 5c2b5cd8-837a-4d2c-a61e-8bdbca90f19a
       level: info
   loggers:
+    audit:
+      transports: [console, graylog_audit]
+      level: info
     sql:
-      transports: [console, sentry, graylog]
-      level: debug
+      transports: [console, sentry]
+      level: info
     http:
-      transports: [console, sentry, graylog]
-      level: debug
+      transports: [console, sentry]
+      level: warning
     email:
-      transports: [console, sentry, graylog]
-      level: debug
+      transports: [console, sentry]
+      level: info
     login:
-      transports: [console, sentry, graylog]
-      level: debug
+      transports: [console, sentry]
+      level: info
     sso:
-      transports: [console, sentry, graylog]
-      level: debug
+      transports: [console, sentry]
+      level: info
 
 #logging:
 #  loggers:

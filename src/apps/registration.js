@@ -1,23 +1,23 @@
 'use strict';
 
-var express = require('express');
-var BluebirdPromise = require('sequelize').Promise;
-var bodyParser = require('body-parser');
-var models = require('../models');
-var ApiError = require('../ApiError.js');
+const express = require('express');
+const BluebirdPromise = require('sequelize').Promise;
+const bodyParser = require('body-parser');
+const models = require('../models');
+const ApiError = require('../ApiError.js');
 
 
-var app = express();
+const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.post('/', function(req, res){
-    models.sequelize.transaction(function(){
+app.post('/', function (req, res) {
+    models.sequelize.transaction(function () {
         //create the tenant
         return models.tenant.create({
-                key: req.body.tenantNameKey,
-                name: req.body.tenantNameKey
-            })
-            .then(function(tenant){
+            key: req.body.tenantNameKey,
+            name: req.body.tenantNameKey
+        })
+            .then(function (tenant) {
                 req.app.get('ssaclCls').set('actor', tenant.id);
                 //create administration application & directory
                 return BluebirdPromise.join(
@@ -32,19 +32,19 @@ app.post('/', function(req, res){
                     tenant.id
                 );
             })
-            .spread(function(application, directory, tenantId){
+            .spread(function (application, directory, tenantId) {
                 //create an account store mapping between the application and the directory
                 //and an admin account in the directory
                 return BluebirdPromise.join(
-                   models.account.create({
-                       email: req.body.email,
-                       givenName: req.body.givenName,
-                       surname: req.body.surname,
-                       password: req.body.password,
-                       directoryId: directory.id,
-                       tenantId: tenantId
-                   }),
-                   models.accountStoreMapping.create({
+                    models.account.create({
+                        email: req.body.email,
+                        givenName: req.body.givenName,
+                        surname: req.body.surname,
+                        password: req.body.password,
+                        directoryId: directory.id,
+                        tenantId: tenantId
+                    }),
+                    models.accountStoreMapping.create({
                         accountStoreId: directory.id,
                         applicationId: application.id,
                         accountStoreType: 'directory',
@@ -55,8 +55,10 @@ app.post('/', function(req, res){
                     })
                 );
             });
+    })
+        .then(function () {
+            res.status(204).json();
         })
-        .then(function(){ res.status(204).json(); })
         .catch(req.next);
 });
 
@@ -68,4 +70,4 @@ app.use(function (err, req, res, next) {
     res.status(ApiError.FROM_ERROR(err).status).send();
 });
 
-module.exports=app;
+module.exports = app;

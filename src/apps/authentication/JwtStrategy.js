@@ -1,13 +1,13 @@
 "use strict";
 
-var util = require('util');
-var passport = require('passport');
-var _ = require('lodash');
-var BluebirdPromise = require('sequelize').Promise;
-var jwt = require('jsonwebtoken');
-var verifyJwt = BluebirdPromise.promisify(jwt.verify);
-var ApiError = require('../../ApiError.js');
-var getApiKey = require('../helpers/getApiKey');
+const util = require('util');
+const passport = require('passport');
+const _ = require('lodash');
+const BluebirdPromise = require('sequelize').Promise;
+const jwt = require('jsonwebtoken');
+const verifyJwt = BluebirdPromise.promisify(jwt.verify);
+const ApiError = require('../../ApiError.js');
+const getApiKey = require('../helpers/getApiKey');
 
 
 function JwtStrategy(jwtExtractor, apiKeyIdExtractor, ...apiKeyIncludes) {
@@ -23,15 +23,15 @@ util.inherits(JwtStrategy, passport.Strategy);
 
 JwtStrategy.prototype.authenticate = function (req) {
     BluebirdPromise.try(() => {
-        var token = this.jwtExtractor(req);
+        const token = this.jwtExtractor(req);
         ApiError.assert(token, 'No auth token');
-        var apiKeyId = this.apiKeyIdExtractor(jwt.decode(token, {complete: true}));
+        const apiKeyId = this.apiKeyIdExtractor(jwt.decode(token, {complete: true}));
         ApiError.assert(apiKeyId, 'no API key Id');
         return getApiKey(apiKeyId, ...this.apiKeyIncludes)
             .tap(_.partial(ApiError.assert, _, 'no API key'))
             .then(apiKey => verifyJwt(token, apiKey.secret).then(_.partial(this.success, apiKey)));
     })
-    .catch(this.fail);
+        .catch(this.fail);
 };
 
 module.exports = JwtStrategy;

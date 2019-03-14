@@ -1,16 +1,16 @@
 "use strict";
 
-var _ = require('lodash');
-var BluebirdPromise = require('sequelize').Promise;
-var Optional = require('optional-js');
-var config = require('config');
-var controllerHelper = require('../helpers/controllerHelper');
-var baseController = require('../helpers/baseController');
-var models = require('../../models');
-var ApiError = require('../../ApiError');
-var email = require('../../helpers/email');
+const _ = require('lodash');
+const BluebirdPromise = require('sequelize').Promise;
+const Optional = require('optional-js');
+const config = require('config');
+const controllerHelper = require('../helpers/controllerHelper');
+const baseController = require('../helpers/baseController');
+const models = require('../../models');
+const ApiError = require('../../ApiError');
+const email = require('../../helpers/email');
 
-var controller = baseController(models.account);
+const controller = baseController(models.account);
 
 controller.getCurrent = function (req, res) {
     res.status(302)
@@ -32,8 +32,8 @@ controller.createApiKey = function(req, res){
 
 controller.getFactors = _.partial(controllerHelper.getCollection, models.account, 'factors');
 controller.createFactor = function(req, res){
-    var accountId = req.swagger.params.id.value;
-    var factorAttributes = req.swagger.params.attributes.value;
+    const accountId = req.swagger.params.id.value;
+    const factorAttributes = req.swagger.params.attributes.value;
     //if accountName is not set, take the account email
     BluebirdPromise.resolve(
       Optional.ofNullable(factorAttributes.accountName)

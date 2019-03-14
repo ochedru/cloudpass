@@ -7,6 +7,7 @@ const Optional = require('optional-js');
 const Op = require('sequelize').Op;
 const addAccountStoreAccessors = require('./helpers/addAccountStoreAccessors');
 const ModelDecorator = require('./helpers/ModelDecorator');
+const logger = require('../helpers/loggingHelper').logger;
 
 module.exports = function (sequelize, DataTypes) {
     return new ModelDecorator(
@@ -127,6 +128,12 @@ module.exports = function (sequelize, DataTypes) {
                             return instance.sequelize.models.emailVerificationToken
                                 .destroy({where: {id: instance.emailVerificationTokenId}});
                         }
+                    },
+                    afterCreate: function (instance) {
+                        logger('audit').info('created account %s (%s) in directory %s with status %s', instance.email, instance.id, instance.directoryId, instance.status);
+                    },
+                    afterDestroy: function (instance) {
+                        logger('audit').info('deleted account %s (%s)', instance.email, instance.id);
                     }
                 }
             }
@@ -196,21 +203,20 @@ module.exports = function (sequelize, DataTypes) {
                         return _.defaults(
                             {
                                 where: {
-                                    [Op.and]: [
-                                        {
-                                            [Op.or]: _([['left', 'right'], ['right', 'left']])
-                                                .map(([idSide, selectedSide]) =>
-                                                    sequelize.dialect.QueryGenerator.selectQuery(
-                                                        models.accountLink.tableName,
-                                                        {
-                                                            attributes: [`${selectedSide}AccountId`],
-                                                            where: {[`${idSide}AccountId`]: this.id}
-                                                        }
-                                                    ).slice(0, -1) // to remove the ';' from the end of the SQL
-                                                )
-                                                .map(accountIdSubSelect => ({id: {[Op.in]: sequelize.literal(`(${accountIdSubSelect})`)}}))
-                                                .value()
-                                        },
+                                    [Op.and]: [{
+                                        [Op.or]: _([['left', 'right'], ['right', 'left']])
+                                            .map(([idSide, selectedSide]) =>
+                                                sequelize.dialect.QueryGenerator.selectQuery(
+                                                    models.accountLink.tableName,
+                                                    {
+                                                        attributes: [`${selectedSide}AccountId`],
+                                                        where: {[`${idSide}AccountId`]: this.id}
+                                                    }
+                                                ).slice(0, -1) // to remove the ';' from the end of the SQL
+                                            )
+                                            .map(accountIdSubSelect => ({id: {[Op.in]: sequelize.literal(`(${accountIdSubSelect})`)}}))
+                                            .value()
+                                    },
                                         _.get(options, 'where')
                                     ]
                                 }
@@ -229,7 +235,7 @@ module.exports = function (sequelize, DataTypes) {
 };
 
 function validateAndHashPassword(instance) {
-    var password = instance.get('password', {role: 'passwordHashing'});
+    const password = instance.get('password', {role: 'passwordHashing'});
     //nothing to do if the password is already hashed
     if (password && !isModularCryptFormat(password)) {
         //else validate the password against the password policy and hash it
