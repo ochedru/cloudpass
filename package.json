@@ -1,6 +1,6 @@
 {
   "name": "cloudpass",
-  "version": "1.8.5",
+  "version": "1.8.6",
   "description": "User management system",
   "keywords": [
     "user management"
@@ -51,7 +51,7 @@
     "passport-http": "0.3.0",
     "passport-jwt-cookiecombo": "1.0.5",
     "pem": "1.14.0",
-    "pg": "7.8.1",
+    "pg": "7.8.2",
     "pg-hstore": "2.3.2",
     "qr-image": "3.2.0",
     "randomstring": "1.1.5",
