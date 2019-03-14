@@ -4,9 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const config = require('config');
 const cls = require('continuation-local-storage');
-const namespace = cls.createNamespace('cloudpass');
 const Sequelize = require('sequelize');
-Sequelize.useCLS(namespace);
 const _ = require('lodash');
 const Umzug = require('umzug');
 const Optional = require('optional-js');
@@ -30,6 +28,8 @@ const persistenceOptions = _.merge(
     config.get('persistence.options')
 );
 
+const namespace = cls.createNamespace('cloudpass');
+Sequelize.useCLS(namespace);
 const sequelize = new Sequelize(config.persistence.database, config.persistence.username, config.persistence.password, persistenceOptions);
 
 //convenience method to start a transaction only if none is already started
