@@ -47,8 +47,7 @@ app.use('/logout', ssaclAuthenticate('sso-jwt-request'));
 
 const cookiePath = url.parse(Optional.ofNullable(config.get('server.rootUrl')).orElse('')+'/sso').pathname;
 
-app.get('/', function(req, res){
-
+function handleRequest(req, res) {
     if(req.query.jwtRequest){
         // the user was redirected from the application to here, and we must redirect it back to the ID site
 
@@ -61,81 +60,81 @@ app.get('/', function(req, res){
                 application.getLookupAccountStore(req.authInfo.onk),
                 Optional.ofNullable(req.authInfo.inv_href).map(href => hrefHelper.resolveHref(href).reload().then(_.property('email'))).orElse(null)
             ).spread(function(accountStore, invitationEmail){
-                    var cookie = req.cookies[req.user.tenantId];
-                    if(cookie){
-                        //the user already authenticated for this tenant
-                        //check if his account belongs to the requested account store
-                        return jwt.verifyAsync(cookie, req.app.get('secret'), {algorithms: ["HS256"]})
-                                .then(cookieJwt => BluebirdPromise.join(
-                                                        cookieJwt.mfa,
-                                                        accountStore.getAccounts({where: {id: cookieJwt.sub}, limit:1}).get(0),
-                                                        cookieJwt.org_href
-                                                   )
-                                )
-                                .spread((verifiedMfa, account, orgHref) => {
-                                    ApiError.assert(account, Error, 'account not found in account store');
-                                    ApiError.assert(!invitationEmail || _.eq(invitationEmail.toLowerCase(), account.email), Error, 'user not logged with the invited email');
-                                    return _.cond([
-                                        [
-                                            //if the user didn't authenticate with one of the requested factor, redirect to ID site with factors scope
-                                            authInfo => !_.isEmpty(authInfo.require_mfa) && !_.includes(authInfo.require_mfa, verifiedMfa),
-                                            authInfo => redirectToIdSite(
-                                                    res,
-                                                    req.user,
-                                                    application,
-                                                    accountStore,
-                                                    authInfo,
-                                                    invitationEmail,
-                                                    {
-                                                        scope: idSiteHelper.getFactorsScope(account.id),
-                                                        org_href: orgHref
-                                                    }
-                                            )
-                                        ],
-                                        [
-                                            //if the settings page is requested, redirect to ID site with the right scope
-                                            _.matchesProperty('path', '/#/settings'),
-                                            authInfo => redirectToIdSite(
-                                                            res,
-                                                            req.user,
-                                                            application,
-                                                            accountStore,
-                                                            authInfo,
-                                                            invitationEmail,
-                                                            {
-                                                                scope: idSiteHelper.getSecuritySettingsScope(account.id),
-                                                                authenticated: true,
-                                                                require_mfa: ['google-authenticator'],
-                                                                org_href: orgHref
-                                                            }
-                                            )
-                                        ],
-                                        [
-                                            //else redirect to the application directly
-                                            _.stubTrue,
-                                            () => idSiteHelper.getJwtResponse(
-                                                    req.user,
-                                                    account.href,
-                                                    {
-                                                        isNewSub: false,
-                                                        status: "AUTHENTICATED",
-                                                        cb_uri: req.authInfo.cb_uri,
-                                                        irt: req.authInfo.jti,
-                                                        state: req.authInfo.state,
-                                                        inv_href: req.authInfo.inv_href,
-                                                        org_href: orgHref
-                                                    }
-                                                )
-                                                .then(sendJwtResponse(res, req.authInfo.cb_uri))
-                                        ]
-                                    ])(req.authInfo);
-                                })
-                            // Either jwt expired or the account does not belong to the account store
-                            //  => re-authentication required
-                            .catch(() => redirectToIdSite(res, req.user, application, accountStore, req.authInfo, invitationEmail));
-                    }
-                    return redirectToIdSite(res, req.user, application, accountStore, req.authInfo, invitationEmail);
-                })
+                var cookie = req.cookies[req.user.tenantId];
+                if(cookie){
+                    //the user already authenticated for this tenant
+                    //check if his account belongs to the requested account store
+                    return jwt.verifyAsync(cookie, req.app.get('secret'), {algorithms: ["HS256"]})
+                        .then(cookieJwt => BluebirdPromise.join(
+                            cookieJwt.mfa,
+                            accountStore.getAccounts({where: {id: cookieJwt.sub}, limit:1}).get(0),
+                            cookieJwt.org_href
+                            )
+                        )
+                        .spread((verifiedMfa, account, orgHref) => {
+                            ApiError.assert(account, Error, 'account not found in account store');
+                            ApiError.assert(!invitationEmail || _.eq(invitationEmail.toLowerCase(), account.email), Error, 'user not logged with the invited email');
+                            return _.cond([
+                                [
+                                    //if the user didn't authenticate with one of the requested factor, redirect to ID site with factors scope
+                                    authInfo => !_.isEmpty(authInfo.require_mfa) && !_.includes(authInfo.require_mfa, verifiedMfa),
+                                    authInfo => redirectToIdSite(
+                                        res,
+                                        req.user,
+                                        application,
+                                        accountStore,
+                                        authInfo,
+                                        invitationEmail,
+                                        {
+                                            scope: idSiteHelper.getFactorsScope(account.id),
+                                            org_href: orgHref
+                                        }
+                                    )
+                                ],
+                                [
+                                    //if the settings page is requested, redirect to ID site with the right scope
+                                    _.matchesProperty('path', '/#/settings'),
+                                    authInfo => redirectToIdSite(
+                                        res,
+                                        req.user,
+                                        application,
+                                        accountStore,
+                                        authInfo,
+                                        invitationEmail,
+                                        {
+                                            scope: idSiteHelper.getSecuritySettingsScope(account.id),
+                                            authenticated: true,
+                                            require_mfa: ['google-authenticator'],
+                                            org_href: orgHref
+                                        }
+                                    )
+                                ],
+                                [
+                                    //else redirect to the application directly
+                                    _.stubTrue,
+                                    () => idSiteHelper.getJwtResponse(
+                                        req.user,
+                                        account.href,
+                                        {
+                                            isNewSub: false,
+                                            status: "AUTHENTICATED",
+                                            cb_uri: req.authInfo.cb_uri,
+                                            irt: req.authInfo.jti,
+                                            state: req.authInfo.state,
+                                            inv_href: req.authInfo.inv_href,
+                                            org_href: orgHref
+                                        }
+                                    )
+                                        .then(sendJwtResponse(res, req.authInfo.cb_uri))
+                                ]
+                            ])(req.authInfo);
+                        })
+                        // Either jwt expired or the account does not belong to the account store
+                        //  => re-authentication required
+                        .catch(() => redirectToIdSite(res, req.user, application, accountStore, req.authInfo, invitationEmail));
+                }
+                return redirectToIdSite(res, req.user, application, accountStore, req.authInfo, invitationEmail);
+            })
                 .catch(req.next);
         } else {
             //callaback URL not authorized (don't throw because errorHandler would redirect to the unauthorized URL)
@@ -156,22 +155,25 @@ app.get('/', function(req, res){
                 expiresIn: moment.duration(req.user.tenant.idSites[0].sessionTtl).asSeconds()
             }
         )
-        .then(function(cookieToken){
-            var cookieOptions = {
-                httpOnly: true,
-                path: cookiePath
-            };
-            if(req.user.tenant.idSites[0].sessionCookiePersistent){
-                cookieOptions.maxAge =  moment.duration(req.user.tenant.idSites[0].sessionTtl).asMilliseconds();
-            }
-            res.cookie(req.user.tenant.id, cookieToken, cookieOptions);
-            sendJwtResponse(res, req.authInfo.cb_uri)(req.query.jwtResponse);
-        })
-        .catch(req.next);
+            .then(function(cookieToken){
+                var cookieOptions = {
+                    httpOnly: true,
+                    path: cookiePath
+                };
+                if(req.user.tenant.idSites[0].sessionCookiePersistent){
+                    cookieOptions.maxAge =  moment.duration(req.user.tenant.idSites[0].sessionTtl).asMilliseconds();
+                }
+                res.cookie(req.user.tenant.id, cookieToken, cookieOptions);
+                sendJwtResponse(res, req.authInfo.cb_uri)(req.query.jwtResponse);
+            })
+            .catch(req.next);
     } else {
         req.next();
     }
-});
+}
+
+app.get('/', handleRequest);
+app.post('/', handleRequest);
 
 app.get('/logout', function(req, res){
     //clear cookie and redirect to ID Site with a restricted scope
