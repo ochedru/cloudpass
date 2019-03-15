@@ -21,55 +21,22 @@ persistence:
     storage: ':memory:'
 
 logging:
-  transports:
-    sentry:
-      module: sentry
-      dsn: https://a7da0ab444914a3881f7557170290009@sentry.dhatim.it/17
-      level: error
-    graylog:
-      module: graylog_ovh
-      graylogHost: gra2.logs.ovh.com
-      graylogOvhTokenValue: 5c2b5cd8-837a-4d2c-a61e-8bdbca90f19a
-      level: debug
-    graylog_audit:
-      module: graylog_ovh
-      graylogHost: gra2.logs.ovh.com
-      graylogOvhTokenValue: 5c2b5cd8-837a-4d2c-a61e-8bdbca90f19a
-      level: info
   loggers:
     audit:
-      transports: [console, graylog_audit]
+      transports: [console]
       level: info
     sql:
-      transports: [console, sentry]
+      transports: [console]
       level: info
     http:
-      transports: [console, sentry]
-      level: warning
+      transports: [console]
+      level: info
     email:
-      transports: [console, sentry]
+      transports: [console]
       level: info
     login:
-      transports: [console, sentry]
+      transports: [console]
       level: info
     sso:
-      transports: [console, sentry]
+      transports: [console]
       level: info
-
-#logging:
-#  loggers:
-#    sql:
-#      transports: [console]
-#      level: debug
-#    http:
-#      transports: [console]
-#      level: debug
-#    email:
-#      transports: [console]
-#      level: debug
-#    login:
-#      transports: [console]
-#      level: debug
-#    sso:
-#      transports: [console]
-#      level: debug
