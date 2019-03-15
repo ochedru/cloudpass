@@ -38,4 +38,4 @@ persistence:
       maxConnections: PERSISTENCE_OPTIONS_POOL_MAX_CONNECTIONS
       maxIdleTime: PERSISTENCE_OPTIONS_POOL_MAX_IDLE_TIME
 
-environment: ENVIRONMENT
+environment: NODE_ENV
