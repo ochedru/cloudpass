@@ -98,7 +98,7 @@ logging:
 #  transports:
 #    sentry:
 #      module: sentry
-#      dsn: https://a7da0ab444914a3881f7557170290009@sentry.dhatim.it/17
+#      dsn: ...
 #      level: error
 #    graylog:
 #      module: graylog_ovh

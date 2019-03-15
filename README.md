@@ -227,6 +227,7 @@ Invitation emails can additionnaly use the following placeholders:
 ### Logging
 
 Loggers can be configured in the *logging* section:
+- *audit*: auditing trail,
 - *sql*: SQL queries before execution,
 - *http*: HTTP requests via [morgan](https://github.com/expressjs/morgan),
 - *email*: sent emails,
@@ -234,35 +235,49 @@ Loggers can be configured in the *logging* section:
 - *sso*: SSO operations.
 
 Each logger can use multiple [transports](https://github.com/winstonjs/winston/blob/master/docs/transports.md).
+- Currently, supported transports are:
+  - standard winston transports (`console`, `file`, `http`, `stream`)
+  - `sentry`
+  - `graylog_ovh`
 - Default transports without configuration (e.g. a naked `console`) can be omitted.
-- Non-default transports have to define their module.
+- Non-default transports have to define their module. See `src/helpers/logging_transports`.
 
 For example:
 ```yaml
 logging:
   transports:
+    sentry:
+      module: sentry
+      dsn: ...
+      level: error
     graylog:
-      module: ovh-winston-ldp
-      graylogHost: hostname
-      graylogPort: 1234
+      module: graylog_ovh
+      graylogHost: ...
       graylogOvhTokenValue: ...
-      graylogFacility: ...
-      graylogFlag: ...
+      level: info
+    graylog_audit:
+      module: graylog_ovh
+      graylogHost: ...
+      graylogOvhTokenValue: ...
+      level: info
   loggers:
+    audit:
+      transports: [console, sentry, graylog_audit]
+      level: info
     sql:
-      transports: [console, graylog]
-      level: warn
+      transports: [console, sentry, graylog]
+      level: info
     http:
-      transports: [console, graylog]
+      transports: [console, sentry, graylog]
       level: info
     email:
-      transports: [console, graylog]
+      transports: [console, sentry, graylog]
       level: info
     login:
-      transports: [console, graylog]
+      transports: [console, sentry, graylog]
       level: info
     sso:
-      transports: [console, graylog]
+      transports: [console, sentry, graylog]
       level: info
 ```
 
