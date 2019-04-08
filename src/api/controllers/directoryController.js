@@ -127,7 +127,7 @@ controller.consumeSamlAssertion = function (req, res) {
                     }
                 })
                     .spread((account, created) => {
-                        logger('sso').debug('found account from SAML response: %s', account.id);
+                        logger('sso').debug('found or created account %s in directory %s from SAML response', account.id, req.swagger.params.id.value);
                         const providerData = _.defaults({providerId: 'saml'}, _.mapValues(samlResponse.user.attributes, _.head));
                         const application = hrefHelper.resolveHref(req.authInfo.app_href);
                         return BluebirdPromise.join(
@@ -161,7 +161,7 @@ controller.consumeSamlAssertion = function (req, res) {
                     .get(0)
                     .then(foundAccount => {
                         if (!foundAccount) {
-                            logger('sso').error('cannot find account %s in account store %s', account.id, accountStore.id);
+                            logger('sso').error('cannot find account %s in account store %s (type %s)', account.id, accountStore.id, accountStore.type);
                         }
                         return ApiError.assert(foundAccount, ApiError, 400, 7104, 'This account does not belong to the required account store');
                     })
