@@ -123,7 +123,8 @@ app.get('/', function (req, res) {
                                             irt: req.authInfo.jti,
                                             state: req.authInfo.state,
                                             inv_href: req.authInfo.inv_href,
-                                            org_href: orgHref
+                                            org_href: orgHref,
+                                            ros: true
                                         }
                                     )
                                         .then(sendJwtResponse(res, req.authInfo.cb_uri))
@@ -148,7 +149,8 @@ app.get('/', function (req, res) {
         jwt.signAsync(
             {
                 mfa: req.authInfo.mfa,
-                org_href: req.authInfo.org_href
+                org_href: req.authInfo.org_href,
+                ros: true
             },
             req.app.get('secret'),
             {
