@@ -160,12 +160,10 @@ controller.consumeSamlAssertion = function (req, res) {
                 })
                     .get(0)
                     .then(foundAccount => {
-                        try {
-                            return ApiError.assert(foundAccount, ApiError, 400, 7104, 'This account does not belong to the required account store');
-                        } catch (e) {
+                        if (!foundAccount) {
                             logger('sso').error('cannot find account %s in account store %s', account.id, accountStore.id);
-                            throw e;
                         }
+                        return ApiError.assert(foundAccount, ApiError, 400, 7104, 'This account does not belong to the required account store');
                     })
             }
         )
