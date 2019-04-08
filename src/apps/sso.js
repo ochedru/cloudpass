@@ -212,7 +212,7 @@ function redirectToIdSite(res, apiKey, application, accountStore, jwtPayload, in
                 state: jwtPayload.state,
                 asnk: jwtPayload.onk, //account store name key
                 sof: jwtPayload.sof, //show organization field
-                ros: jwtPayload.ros, //require organization selection
+                ros: true, // TODO jwtPayload.ros, //require organization selection
                 require_mfa: jwtPayload.require_mfa,
                 //qualify the account store & invitation hrefs
                 ash: Optional.ofNullable(accountStore).map(_.property('href')).map(hrefHelper.unqualifyHref).map(_.bindKey(baseUrl, 'concat')).orElse(null),
