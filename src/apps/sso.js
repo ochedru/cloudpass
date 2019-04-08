@@ -48,7 +48,7 @@ app.use('/logout', ssaclAuthenticate('sso-jwt-request'));
 
 const cookiePath = url.parse(Optional.ofNullable(config.get('server.rootUrl')).orElse('') + '/sso').pathname;
 
-function handleRequest(req, res) {
+app.get('/', function (req, res) {
     if (req.query.jwtRequest) {
         // the user was redirected from the application to here, and we must redirect it back to the ID site
 
@@ -172,10 +172,7 @@ function handleRequest(req, res) {
     } else {
         req.next();
     }
-}
-
-app.get('/', handleRequest);
-app.post('/', handleRequest);
+});
 
 app.get('/logout', function (req, res) {
     //clear cookie and redirect to ID Site with a restricted scope
