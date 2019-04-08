@@ -9,6 +9,7 @@ const models = require('../../models');
 const ApiError = require('../../ApiError');
 const email = require('../../helpers/email');
 const hrefHelper = require('../../helpers/hrefHelper');
+const logger = require('../../helpers/loggingHelper').logger;
 
 
 exports.getSubAccountStore = function(accountStore, subAccountStoreHref){
@@ -175,6 +176,7 @@ exports.getLinkedAccount = async (account, applicationId) =>
                         rightAccountId: linkedAccount.id,
                         tenantId: linkedAccount.tenantId
                     });
+                    logger('sso').debug('created linked account %s for account %s with email %s in directory %s', linkedAccount.id, account.id, account.email, application.defaultAccountStoreMapping.accountStoreId);
                     return linkedAccount;
                 })
                 .orElse(account)
