@@ -220,6 +220,8 @@ module.exports = function (app) {
     app.use(['/applications/*', '/organizations/*', '/accounts/*', '/factors/*', '/challenges/*'], updateBearer, handleRedirects);
     //handle successful 1st factor: either redirect to application or ask for a 2nd factor
     app.post('/applications/:id/loginAttempts', afterAuthentication(_.property('account.href'), false));
+    //handle successful SSO: either redirect to application or ask for a 2nd factor
+    app.post('/directories/:id/saml/sso/post', afterAuthentication(_.property('account.href'), false));
     //after account creation, redirect to the application if the email verification workflow is not enabled
     app.post(
         ['/applications/:id/accounts', '/organizations/:id/accounts'],

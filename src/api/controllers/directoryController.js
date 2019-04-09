@@ -178,7 +178,7 @@ controller.consumeSamlAssertion = function (req, res) {
                     irt: req.authInfo.init_jti,
                     state: req.authInfo.state,
                     inv_href: req.authInfo.inv_href,
-                    org_href: null, //TODO Optional.of(accountStore).filter(as => as instanceof models.organization).map(_.property('href')).orElse(null)
+                    org_href: Optional.of(accountStore).filter(as => as instanceof models.organization).map(_.property('href')).orElse(null)
                     ros: true
                 },
                 req.user.secret,
