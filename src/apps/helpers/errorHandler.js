@@ -37,9 +37,9 @@ const exceptionToApiError = _.cond([
 module.exports = function (err, req, res, next) {
     const apiError = exceptionToApiError(err);
     if (apiError.status === 500) {
-        logger('http').error('Unexpected error: %s', err);
+        logger('http').error('unexpected error: %s', err);
     } else {
-        logger('http').debug('Request failed: %s', err);
+        logger('http').debug('request failed: %s', apiError.developerMessage);
     }
 
     if (res.headersSent) {
