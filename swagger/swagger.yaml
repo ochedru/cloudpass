@@ -939,9 +939,13 @@ paths:
         - name: newAttributes
           description: New attributes
           in: body
-          required: true
           schema:
             type: object
+            required:
+              - clientId
+              - clientSecret
+              - ssoLoginUrl
+              - encodedX509SigningCert
             properties:
               clientId:
                 type: string

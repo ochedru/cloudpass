@@ -61,7 +61,7 @@ module.exports = function (sequelize, DataTypes) {
                     samlProvider: function(){
                         if(this.providerId === 'saml'){
                             ApiError.assert(this.ssoLoginUrl, 'Missing IdP SSO Login URL');
-                            ApiError.assert(this.ssoLogoutUrl, 'Missing IdP SSO Logout URL');
+                            // ssoLogoutUrl is optional
                             ApiError.assert(this.encodedX509SigningCert, 'Missing IdP certificate');
                         }
                     }
