@@ -3,10 +3,9 @@ FROM node:10-slim
 ENV NODE_ENV=production
 ENV NODE_APP_INSTANCE=docker
 
-RUN apk update \
-	&& apk add --no-cache openssl \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& rm -rf /var/cache/apk/*
+RUN apt-get update \
+	&& apt-get --assume-yes --no-install-recommends openssl \
+	&& rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app
 WORKDIR /app
