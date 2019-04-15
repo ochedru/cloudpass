@@ -4,7 +4,7 @@ ENV NODE_ENV=production
 ENV NODE_APP_INSTANCE=docker
 
 RUN apt-get update \
-	&& apt-get --assume-yes --no-install-recommends openssl \
+	&& apt-get --assume-yes --no-install-recommends install openssl \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app
