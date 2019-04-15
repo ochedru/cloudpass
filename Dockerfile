@@ -1,4 +1,4 @@
-FROM node:10-alpine
+FROM node:10-slim
 
 ENV NODE_ENV=production
 ENV NODE_APP_INSTANCE=docker
