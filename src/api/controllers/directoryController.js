@@ -169,9 +169,11 @@ controller.consumeSamlAssertion = function (req, res) {
                     })
             }
         )
-        .spread((account, created, accountStore) => {
-                //const nbOrganizations = models.account.build({id: accountId}).countOrganizations();
-                logger('sso').debug('found %s organizations for account %s', account.countOrganizations(), account.id);
+        .spread((account, created, accountStore) =>
+            BluebirdPromise.join(account, account.countOrganizations(), created, accountStore)
+        )
+        .spread((account, nbOrganizations, created, accountStore) => {
+                logger('sso').debug('found %s organizations for account %s', nbOrganizations, account.id);
                 return signJwt(
                     {
                         isNewSub: created,
