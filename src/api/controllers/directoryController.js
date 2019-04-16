@@ -174,28 +174,32 @@ controller.consumeSamlAssertion = function (req, res) {
         )
         .spread((account, nbOrganizations, created, accountStore) => {
                 logger('sso').debug('found %s organizations for account %s', nbOrganizations, account.id);
-                return signJwt(
-                    {
-                        isNewSub: created,
-                        status: "AUTHENTICATED",
-                        cb_uri: req.authInfo.cb_uri,
-                        irt: req.authInfo.init_jti,
-                        state: req.authInfo.state,
-                        inv_href: req.authInfo.inv_href,
-                        org_href: Optional.of(accountStore).filter(as => as instanceof models.organization).map(_.property('href')).orElse(null)
-                    },
-                    req.user.secret,
-                    {
-                        expiresIn: 60,
-                        issuer: req.authInfo.app_href,
-                        subject: account.href,
-                        audience: req.user.id,
-                        header: {
-                            kid: req.user.id,
-                            stt: 'assertion'
+                if (nbOrganizations > 1) {
+                    // redirect to id site to choose organization
+                } else {
+                    return signJwt(
+                        {
+                            isNewSub: created,
+                            status: "AUTHENTICATED",
+                            cb_uri: req.authInfo.cb_uri,
+                            irt: req.authInfo.init_jti,
+                            state: req.authInfo.state,
+                            inv_href: req.authInfo.inv_href,
+                            org_href: Optional.of(accountStore).filter(as => as instanceof models.organization).map(_.property('href')).orElse(null)
+                        },
+                        req.user.secret,
+                        {
+                            expiresIn: 60,
+                            issuer: req.authInfo.app_href,
+                            subject: account.href,
+                            audience: req.user.id,
+                            header: {
+                                kid: req.user.id,
+                                stt: 'assertion'
+                            }
                         }
-                    }
-                );
+                    );
+                }
             }
         )
         .then(sendJwtResponse(res, req.authInfo.cb_uri))
