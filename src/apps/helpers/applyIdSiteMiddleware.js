@@ -10,6 +10,7 @@ const idSiteHelper = require('./idSiteHelper');
 const models = require('../../models');
 const hrefHelper = require('../../helpers/hrefHelper');
 const scopeHelper = require('../../helpers/scopeHelper');
+const logger = require('../../helpers/loggingHelper').logger;
 
 function applyToIdSiteRequests(middleware) {
     return function (req, res) {
@@ -59,6 +60,7 @@ const afterAuthentication = function (accountHrefGetter, isNewSub, factorTypeGet
             return function (result) {
                 //check if an account has been returned
                 let accountHref = accountHrefGetter(result, req);
+                logger('sso').debug('after authentication {}', accountHref);
                 if (accountHref) {
                     const accountId = /\/accounts\/(.*)$/.exec(accountHref)[1];
                     //request a 2nd factor if the user is not already authenticated
@@ -231,7 +233,7 @@ module.exports = function (app) {
     app.post('/applications/:applicationId/passwordResetTokens/:tokenId', removeCurrentPathFromScope);
     //allow challenging newly created factors
     app.post('/accounts/:id/factors', addPathsToScope(r => ({['/factors/' + r.id + '/challenges']: ['post']})));
-    //Hide configured factor sercrets
+    //Hide configured factor secrets
     app.get('/accounts/:id/factors', hideFactorSecrets);
     //after getting factors:
     // - allow deleting them if the user is authenticated (security settings view)
