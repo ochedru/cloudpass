@@ -170,7 +170,8 @@ controller.consumeSamlAssertion = function (req, res) {
             }
         )
         .spread((account, created, accountStore) => {
-                logger('sso').debug('found %s organizations for account %s', account.countOrgnizations(), account.id);
+                //const nbOrganizations = models.account.build({id: accountId}).countOrganizations();
+                logger('sso').debug('found %s organizations for account %s', account.countOrganizations(), account.id);
                 return signJwt(
                     {
                         isNewSub: created,
