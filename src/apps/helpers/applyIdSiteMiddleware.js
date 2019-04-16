@@ -60,7 +60,7 @@ const afterAuthentication = function (accountHrefGetter, isNewSub, factorTypeGet
             return function (result) {
                 //check if an account has been returned
                 let accountHref = accountHrefGetter(result, req);
-                logger('sso').debug('after authentication {}', accountHref);
+                logger('sso').debug('after authentication %s', accountHref);
                 if (accountHref) {
                     const accountId = /\/accounts\/(.*)$/.exec(accountHref)[1];
                     //request a 2nd factor if the user is not already authenticated
