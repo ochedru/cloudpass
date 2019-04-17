@@ -101,6 +101,7 @@ function getEmail(samlResponse) {
 }
 
 controller.consumeSamlAssertion = function (req, res) {
+    logger('sso').debug('req.body=', JSON.stringify(req.body));
     models.directoryProvider.findOne({
         where: {directoryId: req.swagger.params.id.value},
         include: [models.samlServiceProviderMetadata, models.attributeStatementMappingRules]
@@ -174,7 +175,6 @@ controller.consumeSamlAssertion = function (req, res) {
             BluebirdPromise.join(account, account.countOrganizations(), created, accountStore)
         )
         .spread((account, nbOrganizations, created, accountStore) => {
-            logger('sso').debug('relay state=', JSON.stringify(req.body));
                 logger('sso').debug('found %s organizations for account %s', nbOrganizations, account.id);
                 if (nbOrganizations > 1) {
                     // redirect to id site to choose organization
