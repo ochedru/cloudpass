@@ -182,6 +182,7 @@ controller.consumeSamlAssertion = function (req, res) {
                         models.tenant.findByPk(req.user.tenantId, {
                             include: [{
                                 model: models.idSite,
+                                attributes: ['url'],
                                 limit: 1
                             }]
                         }),
