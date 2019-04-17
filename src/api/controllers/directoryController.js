@@ -3,6 +3,7 @@
 const BluebirdPromise = require('sequelize').Promise;
 const _ = require('lodash');
 const signJwt = BluebirdPromise.promisify(require('jsonwebtoken').sign);
+const decodeJwt = BluebirdPromise.promisify(require('jsonwebtoken').decode);
 const Optional = require('optional-js');
 const accountStoreController = require('../helpers/accountStoreController');
 const controllerHelper = require('../helpers/controllerHelper');
@@ -101,19 +102,20 @@ function getEmail(samlResponse) {
 }
 
 controller.consumeSamlAssertion = function (req, res) {
-    logger('sso').debug('req.body=%s', JSON.stringify(req.body.RelayState));
-    models.directoryProvider.findOne({
+x    models.directoryProvider.findOne({
         where: {directoryId: req.swagger.params.id.value},
         include: [models.samlServiceProviderMetadata, models.attributeStatementMappingRules]
     })
         .then(provider =>
             BluebirdPromise.join(
                 samlHelper.getSamlResponse(provider, req.body),
+                decodeJwt(req.body.RelayState),
                 provider.attributeStatementMappingRules
             )
         )
-        .spread((samlResponse, mappingRules) =>
+        .spread((samlResponse, relayState, mappingRules) =>
             models.sequelize.requireTransaction(() => {
+                logger('sso').debug('incoming RelayState: %s', JSON.stringify(relayState));
                 logger('sso').debug('incoming SAML response: %s', JSON.stringify(samlResponse));
                 const email = getEmail(samlResponse);
                 logger('sso').debug('found email from SAML response: %s', email);
