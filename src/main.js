@@ -1,6 +1,7 @@
 'use strict';
 
 const ssaclCls = require('cls-hooked').createNamespace('sequelize-cls');
+const compression = require('compression');
 const express = require('express');
 const cluster = require('cluster');
 const cookieParser = require('cookie-parser');
@@ -37,6 +38,7 @@ function startServers(secret) {
 
     //load functional components
     const app = express();
+    app.use(compression());
     app.disable('x-powered-by');
     app.set('secret', secret);
     app.use(cookieParser(secret));

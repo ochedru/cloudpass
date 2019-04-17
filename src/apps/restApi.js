@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const BluebirdPromise = require('sequelize').Promise;
+const compression = require('compression');
 const express = require('express');
 const morgan = require('morgan');
 const nocache = require('nocache');
@@ -99,6 +100,7 @@ module.exports = function (secret) {
         .then(function (swaggerExpress) {
 
             const app = express();
+            app.disable('x-powered-by');
             app.use(morgan('tiny', {
                 stream: {
                     write: message => message.split('\n').filter(l => l.length > 0).forEach(l => logger('http').info(l))
@@ -111,6 +113,7 @@ module.exports = function (secret) {
                 }
             }));
             app.use(nocache());
+            app.use(compression());
             app.use(bodyParser.urlencoded({extended: false}));
             app.use(passport.initialize());
 
