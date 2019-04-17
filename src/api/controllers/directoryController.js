@@ -14,6 +14,7 @@ const ApiError = require('../../ApiError');
 const hrefHelper = require('../../helpers/hrefHelper');
 const logger = require('../../helpers/loggingHelper').logger;
 const isemail = require('isemail');
+const scopeHelper = require('../helpers/scopeHelper');
 
 const controller = accountStoreController(models.directory, ['create', 'delete']);
 
@@ -176,7 +177,44 @@ controller.consumeSamlAssertion = function (req, res) {
                 logger('sso').debug('found %s organizations for account %s', nbOrganizations, account.id);
                 if (nbOrganizations > 1) {
                     // redirect to id site to choose organization
+                    const application = hrefHelper.resolveHref(req.authInfo.app_href);
+                    return BluebirdPromise.join(
+                        models.tenant.findByPk(req.user.tenantId),
+                        signJwt(
+                            {
+                                isNewSub: created,
+                                status: "AUTHENTICATED",
+                                cb_uri: req.authInfo.cb_uri,
+                                irt: req.authInfo.init_jti,
+                                state:req.authInfo.state,
+                                inv_href: req.authInfo.inv_href,
+
+                                scope: scopeHelper.getIdSiteScope(application),
+                                init_jti: req.authInfo.init_jti,
+                                asnk: accountStore.name, //account store name key
+                                sof: true, //show organization field
+                                ros: true, //require organization selection
+                                ash: accountStore.href,
+                                //only to not make stormpath.js crash
+                                sp_token: 'null'
+                            },
+                            req.user.secret,
+                            {
+                                expiresIn: 60,
+                                issuer: req.authInfo.app_href,
+                                subject: account.href,
+                                audience: 'idSite'
+                            }
+                        )
+                    )
+                        .then((tenant, token) => {
+                                const location = tenant.idSites[0].url + '/#/?jwt=' + token;
+                                logger('sso').debug('redirect to %s', location);
+                                return res.status(302).location(location).send();
+                            }
+                        );
                 } else {
+                    // only one organization: redirect to application
                     return signJwt(
                         {
                             isNewSub: created,
@@ -198,11 +236,11 @@ controller.consumeSamlAssertion = function (req, res) {
                                 stt: 'assertion'
                             }
                         }
-                    );
+                    )
+                        .then(sendJwtResponse(res, req.authInfo.cb_uri));
                 }
             }
         )
-        .then(sendJwtResponse(res, req.authInfo.cb_uri))
         .catch(req.next);
 };
 
