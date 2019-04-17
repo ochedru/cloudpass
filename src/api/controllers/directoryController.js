@@ -196,6 +196,7 @@ controller.consumeSamlAssertion = function (req, res) {
                                 inv_href: req.authInfo.inv_href,
 
                                 scope: scopeHelper.getIdSiteScope(application),
+                                app_href: application.href,
                                 init_jti: req.authInfo.init_jti,
                                 asnk: accountStore.name, //account store name key
                                 sof: true, //show organization field
@@ -214,9 +215,8 @@ controller.consumeSamlAssertion = function (req, res) {
                         )
                     )
                         .spread((idSite, token) => {
-                            logger('sso').debug('idSite=%s, url=%s', JSON.stringify(idSite), idSite.url);
                                 const location = idSite.url + '/#/?jwt=' + token;
-                                logger('sso').debug('redirect to %s', location);
+                                logger('sso').debug('choose organization, redirect to %s', location);
                                 return res.status(302).location(location).send();
                             }
                         );
