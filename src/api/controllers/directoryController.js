@@ -185,7 +185,7 @@ controller.consumeSamlAssertion = function (req, res) {
                             },
                             attributes: ['url'],
                             limit: 1
-                        }).tap(idSite => {logger('sso').debug('found idSite %s', JSON.stringify(idSite)); return idSite; }),
+                        }),
                         signJwt(
                             {
                                 isNewSub: created,
