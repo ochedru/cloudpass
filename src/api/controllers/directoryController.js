@@ -102,7 +102,7 @@ function getEmail(samlResponse) {
 }
 
 controller.consumeSamlAssertion = function (req, res) {
-    logger('sso').debug('incoming RelayState: %s', JSON.stringify(req.body.RelayState));
+    logger('sso').debug('incoming RelayState: %s, decoded: %s', JSON.stringify(req.body.RelayState), JSON.stringify(require('jsonwebtoken').decode(req.body.RelayState)));
     models.directoryProvider.findOne({
         where: {directoryId: req.swagger.params.id.value},
         include: [models.samlServiceProviderMetadata, models.attributeStatementMappingRules]
@@ -116,7 +116,7 @@ controller.consumeSamlAssertion = function (req, res) {
         )
         .spread((samlResponse, relayState, mappingRules) =>
             models.sequelize.requireTransaction(() => {
-                logger('sso').debug('incoming RelayState: %s', JSON.stringify(relayState));
+                logger('sso').debug('incoming RelayState: %s, decoded: %s', JSON.stringify(relayState));
                 logger('sso').debug('incoming SAML response: %s', JSON.stringify(samlResponse));
                 const email = getEmail(samlResponse);
                 logger('sso').debug('found email from SAML response: %s', email);
