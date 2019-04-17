@@ -174,7 +174,7 @@ controller.consumeSamlAssertion = function (req, res) {
             BluebirdPromise.join(account, account.countOrganizations(), created, accountStore)
         )
         .spread((account, nbOrganizations, created, accountStore) => {
-            logger('sso').debug('swagger params=%s', JSON.stringify(req.swagger.params));
+            logger('sso').debug('relay state=', req.body.RelayState);
                 logger('sso').debug('found %s organizations for account %s', nbOrganizations, account.id);
                 if (nbOrganizations > 1) {
                     // redirect to id site to choose organization
