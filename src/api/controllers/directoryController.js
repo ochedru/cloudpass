@@ -178,9 +178,8 @@ controller.consumeSamlAssertion = function (req, res) {
         .spread((account, nbOrganizations, created, accountStore) => {
                 logger('sso').debug('found %s organizations for account %s', nbOrganizations, account.id);
                 if (nbOrganizations > 1) {
-                    logger('sso').debug('incoming RelayState: %s, decoded: %s', JSON.stringify(req.body.RelayState), JSON.stringify(decodeJwt(req.body.RelayState)));
-
                     // redirect to id site to choose organization
+                    const relayState = decodeJwt(req.body.RelayState);
                     const application = hrefHelper.resolveHref(req.authInfo.app_href);
                     return BluebirdPromise.join(
                         models.idSite.findOne({
@@ -213,7 +212,7 @@ controller.consumeSamlAssertion = function (req, res) {
                             {
                                 expiresIn: 60,
                                 issuer: req.authInfo.app_href,
-                                subject: account.href,
+                                subject: relayState.sub,
                                 audience: 'idSite'
                             }
                         )
