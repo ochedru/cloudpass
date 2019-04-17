@@ -177,14 +177,12 @@ controller.consumeSamlAssertion = function (req, res) {
                 logger('sso').debug('found %s organizations for account %s', nbOrganizations, account.id);
                 if (nbOrganizations > 1) {
                     // redirect to id site to choose organization
-                    logger('sso').debug('req user=%s', JSON.stringify(req.user));
                     const application = hrefHelper.resolveHref(req.authInfo.app_href);
                     return BluebirdPromise.join(
                         models.tenant.findByPk(req.user.tenantId, {
                             include: [{
-                                model: models.directory,
-                                attributes: ['passwordPolicyId'],
-                                include: [models.passwordPolicy]
+                                model: models.idSite,
+                                limit: 1
                             }]
                         }),
                         signJwt(
@@ -193,7 +191,7 @@ controller.consumeSamlAssertion = function (req, res) {
                                 status: "AUTHENTICATED",
                                 cb_uri: req.authInfo.cb_uri,
                                 irt: req.authInfo.init_jti,
-                                state:req.authInfo.state,
+                                state: req.authInfo.state,
                                 inv_href: req.authInfo.inv_href,
 
                                 scope: scopeHelper.getIdSiteScope(application),
