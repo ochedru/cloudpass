@@ -10,7 +10,6 @@ const idSiteHelper = require('./idSiteHelper');
 const models = require('../../models');
 const hrefHelper = require('../../helpers/hrefHelper');
 const scopeHelper = require('../../helpers/scopeHelper');
-const logger = require('../../helpers/loggingHelper').logger;
 
 function applyToIdSiteRequests(middleware) {
     return function (req, res) {
@@ -60,7 +59,6 @@ const afterAuthentication = function (accountHrefGetter, isNewSub, factorTypeGet
             return function (result) {
                 //check if an account has been returned
                 let accountHref = accountHrefGetter(result, req);
-                logger('sso').debug('after authentication %s', accountHref);
                 if (accountHref) {
                     const accountId = /\/accounts\/(.*)$/.exec(accountHref)[1];
                     //request a 2nd factor if the user is not already authenticated

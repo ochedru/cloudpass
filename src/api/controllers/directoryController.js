@@ -197,12 +197,13 @@ controller.consumeSamlAssertion = function (req, res) {
                                 irt: req.authInfo.init_jti,
                                 state: req.authInfo.state,
                                 inv_href: req.authInfo.inv_href,
+                                sofa: account.href,     // select organization for account :)
 
                                 scope: scopeHelper.getIdSiteScope(application),
                                 app_href: application.href,
                                 init_jti: req.authInfo.init_jti,
                                 asnk: accountStore.name, //account store name key
-                                sof: true, //show organization field
+                                //sof: true, //show organization field
                                 ros: true, //require organization selection
                                 ash: application.href,
                                 //only to not make stormpath.js crash
