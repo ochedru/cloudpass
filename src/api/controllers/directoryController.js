@@ -103,7 +103,7 @@ function getEmail(samlResponse) {
 }
 
 controller.consumeSamlAssertion = function (req, res) {
-    logger('sso').debug('incoming RelayState: %s, decoded: %s', JSON.stringify(req.body.RelayState), JSON.stringify(require('jsonwebtoken').decode(req.body.RelayState)));
+    //logger('sso').debug('incoming RelayState: %s, decoded: %s', JSON.stringify(req.body.RelayState), JSON.stringify(require('jsonwebtoken').decode(req.body.RelayState)));
     models.directoryProvider.findOne({
         where: {directoryId: req.swagger.params.id.value},
         include: [models.samlServiceProviderMetadata, models.attributeStatementMappingRules]
