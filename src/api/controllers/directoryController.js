@@ -213,7 +213,7 @@ controller.consumeSamlAssertion = function (req, res) {
                             }
                         )
                     )
-                        .then((idSite, token) => {
+                        .spread((idSite, token) => {
                             logger('sso').debug('idSite=%s, url=%s', JSON.stringify(idSite), idSite.url);
                                 const location = idSite.url + '/#/?jwt=' + token;
                                 logger('sso').debug('redirect to %s', location);
