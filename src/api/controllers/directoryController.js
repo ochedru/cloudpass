@@ -179,13 +179,13 @@ controller.consumeSamlAssertion = function (req, res) {
                     // redirect to id site to choose organization
                     const application = hrefHelper.resolveHref(req.authInfo.app_href);
                     return BluebirdPromise.join(
-                        models.tenant.findByPk(req.user.tenantId, {
-                            include: [{
-                                model: models.idSite,
-                                attributes: ['url'],
-                                limit: 1
-                            }]
-                        }).tap(tenant =>logger('sso').debug('found tenant %s', JSON.stringify(tenant))),
+                        models.idSite.findOne({
+                            where: {
+                                tenantId: req.user.tenantId
+                            },
+                            attributes: ['url'],
+                            limit: 1
+                        }).tap(idSite => logger('sso').debug('found idSite %s', JSON.stringify(idSite))),
                         signJwt(
                             {
                                 isNewSub: created,
@@ -213,8 +213,8 @@ controller.consumeSamlAssertion = function (req, res) {
                             }
                         )
                     )
-                        .then((tenant, token) => {
-                                const location = tenant.idSites[0].url + '/#/?jwt=' + token;
+                        .then((idSite, token) => {
+                                const location = idSite.url + '/#/?jwt=' + token;
                                 logger('sso').debug('redirect to %s', location);
                                 return res.status(302).location(location).send();
                             }
