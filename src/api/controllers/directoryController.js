@@ -213,6 +213,7 @@ controller.consumeSamlAssertion = function (req, res) {
                         )
                     )
                         .then((tenant, token) => {
+                            logger('sso').debug('found tenant %s', JSON.stringify(tenant));
                                 const location = tenant.idSites[0].url + '/#/?jwt=' + token;
                                 logger('sso').debug('redirect to %s', location);
                                 return res.status(302).location(location).send();
