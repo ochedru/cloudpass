@@ -4,7 +4,7 @@ const BluebirdPromise = require('sequelize').Promise;
 const _ = require('lodash');
 const jsonwebtoken = require('jsonwebtoken');
 const signJwt = BluebirdPromise.promisify(jsonwebtoken.sign);
-const decodeJwt = BluebirdPromise.promisify(jsonwebtoken.decode);
+const decodeJwt = jsonwebtoken.decode;
 const Optional = require('optional-js');
 const accountStoreController = require('../helpers/accountStoreController');
 const controllerHelper = require('../helpers/controllerHelper');
@@ -103,7 +103,6 @@ function getEmail(samlResponse) {
 }
 
 controller.consumeSamlAssertion = function (req, res) {
-    //logger('sso').debug('incoming RelayState: %s, decoded: %s', JSON.stringify(req.body.RelayState), JSON.stringify(require('jsonwebtoken').decode(req.body.RelayState)));
     models.directoryProvider.findOne({
         where: {directoryId: req.swagger.params.id.value},
         include: [models.samlServiceProviderMetadata, models.attributeStatementMappingRules]
@@ -111,11 +110,10 @@ controller.consumeSamlAssertion = function (req, res) {
         .then(provider =>
             BluebirdPromise.join(
                 samlHelper.getSamlResponse(provider, req.body),
-                decodeJwt(req.body.RelayState),
                 provider.attributeStatementMappingRules
             )
         )
-        .spread((samlResponse, relayState, mappingRules) =>
+        .spread((samlResponse, mappingRules) =>
             models.sequelize.requireTransaction(() => {
                 logger('sso').debug('incoming SAML response: %s', JSON.stringify(samlResponse));
                 const email = getEmail(samlResponse);
@@ -180,6 +178,8 @@ controller.consumeSamlAssertion = function (req, res) {
         .spread((account, nbOrganizations, created, accountStore) => {
                 logger('sso').debug('found %s organizations for account %s', nbOrganizations, account.id);
                 if (nbOrganizations > 1) {
+                    logger('sso').debug('incoming RelayState: %s, decoded: %s', JSON.stringify(req.body.RelayState), JSON.stringify(decodeJwt(req.body.RelayState)));
+
                     // redirect to id site to choose organization
                     const application = hrefHelper.resolveHref(req.authInfo.app_href);
                     return BluebirdPromise.join(
