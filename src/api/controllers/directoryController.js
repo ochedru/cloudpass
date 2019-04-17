@@ -201,7 +201,7 @@ controller.consumeSamlAssertion = function (req, res) {
                                 asnk: accountStore.name, //account store name key
                                 sof: true, //show organization field
                                 ros: true, //require organization selection
-                                ash: accountStore.href,
+                                ash: application.href,
                                 //only to not make stormpath.js crash
                                 sp_token: 'null'
                             },
