@@ -14,7 +14,7 @@ const ApiError = require('../../ApiError');
 const hrefHelper = require('../../helpers/hrefHelper');
 const logger = require('../../helpers/loggingHelper').logger;
 const isemail = require('isemail');
-const scopeHelper = require('../../apps/helpers/scopeHelper');
+const scopeHelper = require('../../helpers/scopeHelper');
 
 const controller = accountStoreController(models.directory, ['create', 'delete']);
 
