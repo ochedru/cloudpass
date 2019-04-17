@@ -2,8 +2,9 @@
 
 const BluebirdPromise = require('sequelize').Promise;
 const _ = require('lodash');
-const signJwt = BluebirdPromise.promisify(require('jsonwebtoken').sign);
-const decodeJwt = BluebirdPromise.promisify(require('jsonwebtoken').decode);
+const jsonwebtoken = require('jsonwebtoken');
+const signJwt = BluebirdPromise.promisify(jsonwebtoken.sign);
+const decodeJwt = BluebirdPromise.promisify(jsonwebtoken.decode);
 const Optional = require('optional-js');
 const accountStoreController = require('../helpers/accountStoreController');
 const controllerHelper = require('../helpers/controllerHelper');
@@ -116,7 +117,6 @@ controller.consumeSamlAssertion = function (req, res) {
         )
         .spread((samlResponse, relayState, mappingRules) =>
             models.sequelize.requireTransaction(() => {
-                logger('sso').debug('incoming RelayState: %s, decoded: %s', JSON.stringify(relayState));
                 logger('sso').debug('incoming SAML response: %s', JSON.stringify(samlResponse));
                 const email = getEmail(samlResponse);
                 logger('sso').debug('found email from SAML response: %s', email);
