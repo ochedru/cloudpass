@@ -177,6 +177,7 @@ controller.consumeSamlAssertion = function (req, res) {
                 logger('sso').debug('found %s organizations for account %s', nbOrganizations, account.id);
                 if (nbOrganizations > 1) {
                     // redirect to id site to choose organization
+                    logger('sso').debug('tenant id=%s', req.user.tenantId);
                     const application = hrefHelper.resolveHref(req.authInfo.app_href);
                     return BluebirdPromise.join(
                         models.tenant.findByPk(req.user.tenantId),
