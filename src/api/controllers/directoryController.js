@@ -185,7 +185,7 @@ controller.consumeSamlAssertion = function (req, res) {
                                 attributes: ['url'],
                                 limit: 1
                             }]
-                        }),
+                        }).tap(tenant =>logger('sso').debug('found tenant %s', JSON.stringify(tenant))),
                         signJwt(
                             {
                                 isNewSub: created,
@@ -214,7 +214,6 @@ controller.consumeSamlAssertion = function (req, res) {
                         )
                     )
                         .then((tenant, token) => {
-                            logger('sso').debug('found tenant %s', JSON.stringify(tenant));
                                 const location = tenant.idSites[0].url + '/#/?jwt=' + token;
                                 logger('sso').debug('redirect to %s', location);
                                 return res.status(302).location(location).send();
