@@ -199,7 +199,7 @@ controller.consumeSamlAssertion = function (req, res) {
                                 inv_href: req.authInfo.inv_href,
                                 sofa: account.href,     // select organization for account :)
 
-                                scope: scopeHelper.getIdSiteScope(application),
+                                scope: scopeHelper.getIdSiteScope(application, accountStore),
                                 app_href: application.href,
                                 init_jti: req.authInfo.init_jti,
                                 asnk: accountStore.name, //account store name key
