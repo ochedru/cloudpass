@@ -16,7 +16,7 @@ const ApiError = require('../../ApiError');
 const hrefHelper = require('../../helpers/hrefHelper');
 const logger = require('../../helpers/loggingHelper').logger;
 const isemail = require('isemail');
-const scopeHelper = require('../../helpers/scopeHelper');
+const idSiteHelper = require('../../apps/helpers/idSiteHelper');
 
 const controller = accountStoreController(models.directory, ['create', 'delete']);
 
@@ -192,14 +192,13 @@ controller.consumeSamlAssertion = function (req, res) {
                         signJwt(
                             {
                                 isNewSub: created,
-                                status: "AUTHENTICATED",
                                 cb_uri: req.authInfo.cb_uri,
                                 irt: req.authInfo.init_jti,
                                 state: req.authInfo.state,
                                 inv_href: req.authInfo.inv_href,
-                                sofa: account.href,     // select organization for account :)
+                                sofa: account.href,     // select organization for account
 
-                                scope: scopeHelper.getIdSiteScope(application, accountStore),
+                                scope: idSiteHelper.getAccountOrganizationsScope(account.id),
                                 app_href: application.href,
                                 init_jti: req.authInfo.init_jti,
                                 asnk: accountStore.name, //account store name key
