@@ -16,6 +16,7 @@ const ApiError = require('../../ApiError');
 const hrefHelper = require('../../helpers/hrefHelper');
 const logger = require('../../helpers/loggingHelper').logger;
 const isemail = require('isemail');
+const scopeHelper = require('../../helpers/scopeHelper')
 const idSiteHelper = require('../../apps/helpers/idSiteHelper');
 
 const controller = accountStoreController(models.directory, ['create', 'delete']);
@@ -198,7 +199,8 @@ controller.consumeSamlAssertion = function (req, res) {
                                 inv_href: req.authInfo.inv_href,
                                 sofa: account.href,     // select organization for account
 
-                                scope: idSiteHelper.getAccountOrganizationsScope(account.id),
+                                scope: _.merge(scopeHelper.getIdSiteScope(application, accountStore),
+                                    idSiteHelper.getAccountOrganizationsScope(account.id)),
                                 app_href: application.href,
                                 init_jti: req.authInfo.init_jti,
                                 asnk: accountStore.name, //account store name key
