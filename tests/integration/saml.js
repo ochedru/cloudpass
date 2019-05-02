@@ -57,7 +57,7 @@ describe('SAML', function () {
                 .accept('*.*')
                 .expect(200)
                 .then(function (res) {
-                    assert.strictEqual(res.type, 'application/xml');
+                    assert.strictEqual(res.type, 'text/xml');
                     return null;
                 });
         });
