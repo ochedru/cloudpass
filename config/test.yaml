@@ -20,6 +20,9 @@ persistence:
     dialect: sqlite
     storage: ':memory:'
 
+gc:
+  minPauseMS: 1000
+
 logging:
   loggers:
     audit:
@@ -37,3 +40,6 @@ logging:
     sso:
       transports: [console]
       level: info
+    gc:
+      transports: [console]
+      level: warn

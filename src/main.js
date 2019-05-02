@@ -12,6 +12,7 @@ const randomstring = require('randomstring');
 const _ = require('lodash');
 const loggingHelper = require('./helpers/loggingHelper');
 const loadLoggingConfig = require('sequelize').Promise.promisify(loggingHelper.fromConfig);
+const gc = require('gc-stats');
 
 
 module.exports = loadLoggingConfig(config.get('logging'))
@@ -52,6 +53,12 @@ function startServers(secret) {
     app.use('/registration', require('./apps/registration'));
     app.use('/adminInvitation', require('./apps/adminInvitation'));
     app.use('/sso', require('./apps/sso'));
+
+    gc().on('stats', stats => {
+        if (stats.pauseMS >= config.get('gc').minPauseMS) {
+            loggingHelper.logger('gc').warn('paused during %sms (GC type %s)', stats.pauseMS, stats.gctype);
+        }
+    });
 
     return require('./apps/restApi')(secret)
         .then(function (apiApp) {
