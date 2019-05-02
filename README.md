@@ -232,7 +232,7 @@ Loggers can be configured in the *logging* section:
 - *http*: HTTP requests via [morgan](https://github.com/expressjs/morgan),
 - *email*: sent emails,
 - *sso*: SSO operations,
-- *gc*: GC pauses
+- *gc*: GC pauses (configure warning and error durations in the `gc` section)
 
 Each logger can use multiple [transports](https://github.com/winstonjs/winston/blob/master/docs/transports.md).
 - Currently, supported transports are:

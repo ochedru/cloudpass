@@ -55,8 +55,15 @@ function startServers(secret) {
     app.use('/sso', require('./apps/sso'));
 
     gc().on('stats', stats => {
-        if (stats.pauseMS >= config.get('gc').minPauseMS) {
-            loggingHelper.logger('gc').warn('paused during %sms (GC type %s)', stats.pauseMS, stats.gctype);
+        const gcConfig = config.get('gc');
+        let log = null;
+        if (stats.pauseMS >= gcConfig.errorPauseMs) {
+            log = loggingHelper.logger('gc').error;
+        } else if (stats.pauseMS >= gcConfig.warnPauseMs) {
+            log = loggingHelper.logger('gc').warn;
+        }
+        if (log !== null) {
+            log('paused during %sms (GC type %s)', stats.pauseMS, stats.gctype);
         }
     });
 

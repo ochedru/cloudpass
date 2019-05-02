@@ -21,7 +21,8 @@ persistence:
     storage: ':memory:'
 
 gc:
-  minPauseMS: 1000
+  warnPauseMs: 1000
+  errorPauseMs: 5000
 
 logging:
   loggers:

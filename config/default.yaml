@@ -70,7 +70,8 @@ persistence:
 environment: development
 
 gc:
-  minPauseMS: 5000
+  warnPauseMs: 1000
+  errorPauseMs: 5000
 
 logging:
   loggers:
